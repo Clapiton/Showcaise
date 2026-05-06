@@ -24,7 +24,7 @@ export async function runWithFallback<T>(
   availability: AvailabilityMap,
   hasImages: boolean = false,
   onStatus?: StatusCallback
-): Promise<T> {
+): Promise<{ data: T; modelId: string }> {
   const model = pickModel(role, availability, hasImages);
   
   onStatus?.({ type: 'model_start', role, modelId: model.id });
@@ -34,10 +34,9 @@ export async function runWithFallback<T>(
     const result = await task(model);
     const duration = Date.now() - start;
     onStatus?.({ type: 'model_done', role, modelId: model.id, duration });
-    return result;
+    return { data: result, modelId: model.id };
   } catch (error: any) {
     console.error(`Error with model ${model.id}:`, error);
-    // In a real app, we would retry with another candidate here
     throw error;
   }
 }

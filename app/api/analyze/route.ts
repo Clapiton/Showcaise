@@ -15,7 +15,10 @@ export async function POST(req: Request) {
       true
     );
     
-    return NextResponse.json(result);
+    return NextResponse.json({ 
+      data: result.data, 
+      modelId: result.modelId 
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

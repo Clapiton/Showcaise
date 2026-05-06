@@ -19,7 +19,10 @@ export async function POST(req: Request) {
     );
     
     console.log('--- API/BUILD-HTML: DONE ---');
-    return NextResponse.json({ html: result });
+    return NextResponse.json({ 
+      html: result.data, 
+      modelId: result.modelId 
+    });
   } catch (error: any) {
     console.error('--- API/BUILD-HTML: ERROR ---', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
