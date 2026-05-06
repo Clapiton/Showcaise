@@ -16,21 +16,21 @@ export const MODEL_REGISTRY: Record<string, ModelConfig> = {
     provider: 'openai',
     capabilities: ['design', 'copy', 'html'],
     supportsVision: true,
-    priority: { design: 1, copy: 1, html: 2 },
+    priority: { design: 1, copy: 1, html: 3 },
   },
   'gpt-4o-mini': {
     id: 'gpt-4o-mini',
     provider: 'openai',
     capabilities: ['copy', 'html'],
     supportsVision: true,
-    priority: { design: 2, copy: 2, html: 3 },
+    priority: { design: 2, copy: 2, html: 1 },
   },
   'deepseek-chat': {
     id: 'deepseek-chat',
     provider: 'deepseek',
     capabilities: ['copy', 'html'],
     supportsVision: false,
-    priority: { design: 3, copy: 3, html: 1 },
+    priority: { design: 3, copy: 3, html: 2 },
   },
 };
 

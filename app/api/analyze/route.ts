@@ -3,6 +3,8 @@ import { buildAvailabilityMap } from '@/lib/model-router';
 import { runWithFallback } from '@/lib/agent-runner';
 import { runDesignAgent } from '@/lib/agents/design';
 
+export const runtime = 'edge';
+
 export async function POST(req: Request) {
   try {
     const { appName, category, screenshots } = await req.json();

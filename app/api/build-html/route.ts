@@ -3,6 +3,8 @@ import { buildAvailabilityMap } from '@/lib/model-router';
 import { runWithFallback } from '@/lib/agent-runner';
 import { runHtmlAgent } from '@/lib/agents/html';
 
+export const runtime = 'edge';
+
 export async function POST(req: Request) {
   console.log('--- API/BUILD-HTML: START ---');
   try {

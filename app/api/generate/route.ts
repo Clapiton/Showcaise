@@ -3,6 +3,8 @@ import { buildAvailabilityMap } from '@/lib/model-router';
 import { runWithFallback } from '@/lib/agent-runner';
 import { runCopyAgent } from '@/lib/agents/copy';
 
+export const runtime = 'edge';
+
 export async function POST(req: Request) {
   try {
     const { appName, tagline, description, design } = await req.json();
