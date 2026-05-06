@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { buildAvailabilityMap, MODEL_REGISTRY } from '@/lib/model-router';
+import { buildAvailabilityMap, MODEL_REGISTRY, pickModel } from '@/lib/model-router';
 import { runWithFallback } from '@/lib/agent-runner';
 import { runHtmlAgent, streamHtmlAgent } from '@/lib/agents/html';
 

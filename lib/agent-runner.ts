@@ -23,9 +23,10 @@ export async function runWithFallback<T>(
   task: (model: ModelConfig) => Promise<T>,
   availability: AvailabilityMap,
   hasImages: boolean = false,
+  preference?: string,
   onStatus?: StatusCallback
 ): Promise<{ data: T; modelId: string }> {
-  const model = pickModel(role, availability, hasImages);
+  const model = pickModel(role, availability, hasImages, preference);
   
   onStatus?.({ type: 'model_start', role, modelId: model.id });
   

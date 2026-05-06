@@ -45,28 +45,33 @@ interface PortfolioStore {
 export const useStore = create<PortfolioStore>()(
   persist(
     (set) => ({
-  modelPrefs: {
-    design: 'gpt-5',
-    copy: 'gpt-5',
-    html: 'gpt-5',
-  },
-  setFormData: (formData) => set({ formData }),
-  setDesignData: (designData) => set({ designData }),
-  setCopyData: (copyData) => set({ copyData }),
-  setHtmlData: (htmlData) => set({ htmlData }),
-  setModelPrefs: (modelPrefs) => set({ modelPrefs }),
-  addPortfolio: (portfolio) => set((state) => ({ 
-    portfolios: [portfolio, ...state.portfolios] 
-  })),
-  deletePortfolio: (id) => set((state) => ({ 
-    portfolios: state.portfolios.filter(p => p.id !== id) 
-  })),
-  resetCurrent: () => set({
-    formData: null,
-    designData: null,
-    copyData: null,
-    htmlData: null,
-  }),
+      formData: null,
+      designData: null,
+      copyData: null,
+      htmlData: null,
+      portfolios: [],
+      modelPrefs: {
+        design: 'gpt-5',
+        copy: 'gpt-5',
+        html: 'gpt-5',
+      },
+      setFormData: (formData) => set({ formData }),
+      setDesignData: (designData) => set({ designData }),
+      setCopyData: (copyData) => set({ copyData }),
+      setHtmlData: (htmlData) => set({ htmlData }),
+      setModelPrefs: (modelPrefs) => set({ modelPrefs }),
+      addPortfolio: (portfolio) => set((state) => ({ 
+        portfolios: [portfolio, ...state.portfolios] 
+      })),
+      deletePortfolio: (id) => set((state) => ({ 
+        portfolios: state.portfolios.filter(p => p.id !== id) 
+      })),
+      resetCurrent: () => set({
+        formData: null,
+        designData: null,
+        copyData: null,
+        htmlData: null,
+      }),
     }),
     {
       name: 'showcaise-storage',
