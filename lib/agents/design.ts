@@ -41,8 +41,8 @@ export async function runDesignAgent(
         "display": "Syne | Cabinet Grotesk | Playfair Display | General Sans | Clash Display",
         "body": "DM Sans | Inter | Satoshi | Instrument Sans"
       },
-      "layout_style": "editorial | dashboard-heavy | story-narrative | feature-forward | minimal-impact",
-      "section_order": ["hero", "problem", "features", "process", "stats", "result"],
+      "layout_style": "editorial | minimal-grid | feature-forward | story-narrative | impact-metrics",
+      "section_order": ["hero", "stats", "problem", "features", "process", "result", "tech"],
       "hero_style": "fullbleed-mockup | split-layout | centered-minimal | asymmetric",
       "mockup_count": 5,
       "color_reasoning": "Explain why these colors work for a premium case study."

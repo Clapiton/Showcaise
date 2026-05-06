@@ -5,16 +5,14 @@ import { DesignOutput } from './design';
 import { CopyOutput } from './copy';
 
 // ─── The scaffold with named slots ───────────────────────────
-const HTML_SCAFFOLD = `<!DOCTYPE html>
-<html lang="en">
-<head>
+// ─── BASE STYLES & SHARED UTILS ─────────────────────────────
+const BASE_HEAD = `
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>{{APP_NAME}} — Case Study</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family={{DISPLAY_FONT}}:wght@400;600;700;800&family={{BODY_FONT}}:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <style>
-/* ── DESIGN TOKENS ── */
 :root {
   --primary:    {{PRIMARY_COLOR}};
   --secondary:  {{SECONDARY_COLOR}};
@@ -32,8 +30,6 @@ const HTML_SCAFFOLD = `<!DOCTYPE html>
   --font-display: '{{DISPLAY_FONT_NAME}}', sans-serif;
   --font-body:    '{{BODY_FONT_NAME}}', sans-serif;
 }
-
-/* ── RESET ── */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
@@ -43,402 +39,86 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
+.section { padding: 80px 60px; }
+@media (max-width: 900px) { .section { padding: 60px 32px; } }
+@media (max-width: 600px) { .section { padding: 48px 20px; } }
+</style>
+`;
 
-/* ── TOP BAR ── */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 60px;
-  border-bottom: 1px solid var(--border);
-}
-.topbar-logo {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.5px;
-  color: var(--text);
-}
+// ─── TEMPLATE 1: EDITORIAL (High Contrast, Bold) ────────────
+const TEMPLATE_EDITORIAL = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+${BASE_HEAD}
+<style>
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 24px 60px; border-bottom: 1px solid var(--border); }
+.topbar-logo { font-family: var(--font-display); font-weight: 800; font-size: 18px; letter-spacing: -0.5px; color: var(--text); }
 .topbar-logo span { color: var(--accent); }
-.topbar-tags {
-  display: flex;
-  gap: 10px;
-}
-.tag {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 5px 14px;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
+.tag { font-size: 11px; font-weight: 500; padding: 5px 14px; border-radius: 100px; border: 1px solid var(--border); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
 
-/* ── HERO ── */
-.hero {
-  background: var(--bg);
-  padding: 80px 60px 0;
-  position: relative;
-  overflow: hidden;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -120px; left: 50%;
-  transform: translateX(-50%);
-  width: 700px; height: 700px;
-  background: radial-gradient(circle, {{ACCENT_COLOR}}18 0%, transparent 70%);
-  pointer-events: none;
-}
-.hero-header {
-  text-align: center;
-  position: relative;
-  z-index: 2;
-  margin-bottom: 64px;
-}
-.hero-eyebrow {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 20px;
-}
-.hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(48px, 6vw, 88px);
-  font-weight: 800;
-  color: var(--text);
-  line-height: 0.95;
-  letter-spacing: -2px;
-  margin-bottom: 24px;
-}
-.hero-title em {
-  font-style: normal;
-  color: var(--accent);
-}
-.hero-sub {
-  font-size: 15px;
-  font-weight: 300;
-  color: var(--text-muted);
-  max-width: 520px;
-  margin: 0 auto;
-  line-height: 1.7;
-}
+.hero { background: var(--bg); padding: 80px 60px 0; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -120px; left: 50%; transform: translateX(-50%); width: 700px; height: 700px; background: radial-gradient(circle, {{ACCENT_COLOR}}18 0%, transparent 70%); pointer-events: none; }
+.hero-header { text-align: center; position: relative; z-index: 2; margin-bottom: 64px; }
+.hero-eyebrow { font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+.hero-title { font-family: var(--font-display); font-size: clamp(48px, 6vw, 88px); font-weight: 800; color: var(--text); line-height: 0.95; letter-spacing: -2px; margin-bottom: 24px; }
+.hero-title em { font-style: normal; color: var(--accent); }
+.hero-sub { font-size: 15px; font-weight: 300; color: var(--text-muted); max-width: 520px; margin: 0 auto; line-height: 1.7; }
 
-/* ── MOCKUP STAGE ── */
-.mockup-stage {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  height: 440px;
-  z-index: 2;
-}
-.phone {
-  position: absolute;
-  bottom: 0;
-  border-radius: 36px;
-  border: 2px solid var(--border);
-  overflow: hidden;
-  background: var(--bg-2);
-  box-shadow: 0 40px 80px rgba(0,0,0,0.1), 0 0 0 1px var(--border);
-  transition: transform 0.3s ease;
-}
+.mockup-stage { position: relative; display: flex; justify-content: center; align-items: flex-end; height: 440px; z-index: 2; }
+.phone { position: absolute; bottom: 0; border-radius: 36px; border: 2px solid var(--border); overflow: hidden; background: var(--bg-2); box-shadow: 0 40px 80px rgba(0,0,0,0.1), 0 0 0 1px var(--border); transition: transform 0.3s ease; }
 .phone:hover { transform: translateY(-8px) !important; }
-.phone-screen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.phone-screen img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-  display: block;
-}
-
-/* Phone positions */
+.phone-screen img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
 {{PHONE_POSITIONS_CSS}}
 
-/* ── SECTION WRAPPER ── */
-.section { padding: 80px 60px; }
-.section-dark { background: var(--bg-2); }
-.section-gray { background: var(--gray-1); }
-
-/* ── STATS ROW ── */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-}
-.stat-cell {
-  background: var(--bg);
-  padding: 40px 32px;
-  text-align: center;
-}
-.stat-n {
-  font-family: var(--font-display);
-  font-size: 52px;
-  font-weight: 800;
-  color: var(--text);
-  line-height: 1;
-  margin-bottom: 8px;
-  letter-spacing: -2px;
-}
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.stat-cell { background: var(--bg); padding: 40px 32px; text-align: center; }
+.stat-n { font-family: var(--font-display); font-size: 52px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 8px; letter-spacing: -2px; }
 .stat-n span { color: var(--accent); }
-.stat-l {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-weight: 400;
-  line-height: 1.4;
-}
+.stat-l { font-size: 13px; color: var(--text-muted); font-weight: 400; line-height: 1.4; }
 
-/* ── PROCESS ── */
-.process-title {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 36px;
-}
-.process-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-.process-pill {
-  border-radius: 100px;
-  padding: 14px 24px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 14px;
-}
-.process-item {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 18px;
-  font-size: 13px;
-  color: var(--text);
-  margin-bottom: 10px;
-  text-align: center;
-  font-weight: 400;
-}
+.process-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 36px; }
+.process-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.process-pill { border-radius: 100px; padding: 14px 24px; font-family: var(--font-display); font-weight: 700; font-size: 14px; text-align: center; margin-bottom: 14px; }
+.process-item { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; font-size: 13px; color: var(--text); margin-bottom: 10px; text-align: center; font-weight: 400; }
 
-/* ── TIMELINE ── */
-.timeline-wrap {
-  display: flex;
-  gap: 60px;
-}
-.timeline-line {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 6px;
-  flex-shrink: 0;
-}
-.timeline-node {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: var(--text);
-  color: var(--bg);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 14px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 2;
-}
-.timeline-dash {
-  width: 2px;
-  flex: 1;
-  background: repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 6px, transparent 6px, transparent 12px);
-  margin: 8px 0;
-  min-height: 60px;
-}
+.timeline-wrap { display: flex; gap: 60px; }
+.timeline-line { display: flex; flex-direction: column; align-items: center; padding-top: 6px; flex-shrink: 0; }
+.timeline-node { width: 36px; height: 36px; border-radius: 50%; background: var(--text); color: var(--bg); font-family: var(--font-display); font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 2; }
+.timeline-dash { width: 2px; flex: 1; background: repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 6px, transparent 6px, transparent 12px); margin: 8px 0; min-height: 60px; }
 .timeline-content { flex: 1; padding-bottom: 64px; }
-.timeline-eyebrow {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-}
-.timeline-heading {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 3vw, 44px);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -1px;
-  margin-bottom: 28px;
-  color: var(--text);
-}
+.timeline-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+.timeline-heading { font-family: var(--font-display); font-size: clamp(28px, 3vw, 44px); font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 28px; color: var(--text); }
 .timeline-bullets { list-style: none; }
-.timeline-bullets li {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  font-size: 15px;
-  font-weight: 300;
-  line-height: 1.65;
-  color: var(--text);
-  margin-bottom: 18px;
-}
-.bullet-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--text);
-  flex-shrink: 0;
-  margin-top: 8px;
-}
+.timeline-bullets li { display: flex; gap: 14px; align-items: flex-start; font-size: 15px; font-weight: 300; line-height: 1.65; color: var(--text); margin-bottom: 18px; }
+.bullet-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text); flex-shrink: 0; margin-top: 8px; }
 .bullet-dot.accent { background: var(--accent); }
 
-/* ── FEATURES GRID ── */
-.features-eyebrow {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 16px;
-}
-.features-heading {
-  font-family: var(--font-display);
-  font-size: clamp(32px, 4vw, 54px);
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  color: var(--text);
-  margin-bottom: 56px;
-  line-height: 1.05;
-}
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-.feature-card {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 32px 28px;
-  transition: border-color 0.3s, transform 0.3s;
-  cursor: default;
-}
-.feature-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-4px);
-}
-.feature-icon {
-  width: 48px; height: 48px;
-  border-radius: 14px;
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-mid);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  margin-bottom: 20px;
-}
-.feature-title {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 10px;
-}
-.feature-desc {
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
+.features-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.features-heading { font-family: var(--font-display); font-size: clamp(32px, 4vw, 54px); font-weight: 800; letter-spacing: -1.5px; color: var(--text); margin-bottom: 56px; line-height: 1.05; }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feature-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 20px; padding: 32px 28px; transition: border-color 0.3s, transform 0.3s; cursor: default; }
+.feature-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+.feature-icon { width: 48px; height: 48px; border-radius: 14px; background: var(--accent-dim); border: 1px solid var(--accent-mid); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 20px; }
+.feature-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.feature-desc { font-size: 13px; font-weight: 300; color: var(--text-muted); line-height: 1.6; }
 
-/* ── RESULT BAND ── */
-.result-band {
-  background: var(--accent);
-  padding: 64px 60px;
-  display: flex;
-  align-items: center;
-  gap: 80px;
-}
-.result-band-title {
-  font-family: var(--font-display);
-  font-size: clamp(36px, 4vw, 60px);
-  font-weight: 800;
-  color: var(--bg);
-  letter-spacing: -2px;
-  line-height: 1;
-  flex-shrink: 0;
-  max-width: 340px;
-}
+.result-band { background: var(--accent); padding: 64px 60px; display: flex; align-items: center; gap: 80px; }
+.result-band-title { font-family: var(--font-display); font-size: clamp(36px, 4vw, 60px); font-weight: 800; color: var(--bg); letter-spacing: -2px; line-height: 1; flex-shrink: 0; max-width: 340px; }
 .result-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; flex: 1; }
-.result-n {
-  font-family: var(--font-display);
-  font-size: 42px;
-  font-weight: 800;
-  color: var(--bg);
-  letter-spacing: -2px;
-  line-height: 1;
-  margin-bottom: 6px;
-}
+.result-n { font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--bg); letter-spacing: -2px; line-height: 1; margin-bottom: 6px; }
 .result-l { font-size: 13px; color: var(--bg); opacity: 0.8; font-weight: 400; }
 
-/* ── TECH STACK ── */
-.tech-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 32px;
-}
-.tech-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 500;
-  background: var(--bg);
-  color: var(--text);
-}
+.tech-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.tech-badge { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 100px; font-size: 13px; font-weight: 500; background: var(--bg); color: var(--text); }
 .tech-dot { width: 8px; height: 8px; border-radius: 50%; }
 
-/* ── FOOTER ── */
-.footer {
-  padding: 48px 60px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.footer-brand {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 20px;
-  letter-spacing: -0.5px;
-  color: var(--text);
-}
+.footer { padding: 48px 60px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.footer-brand { font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.5px; color: var(--text); }
 .footer-brand span { color: var(--accent); }
 .footer-meta { font-size: 12px; color: var(--gray-3); }
 
-/* ── RESPONSIVE ── */
 @media (max-width: 900px) {
-  .section { padding: 60px 32px; }
   .hero { padding: 60px 32px 0; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .process-grid { grid-template-columns: 1fr; gap: 24px; }
@@ -449,110 +129,156 @@ body {
   .timeline-wrap { gap: 28px; }
   .footer { flex-direction: column; gap: 12px; text-align: center; padding: 36px 32px; }
   .topbar { padding: 20px 32px; }
-  .topbar-tags { display: none; }
   .mockup-stage { height: 360px; }
 }
-
 @media (max-width: 600px) {
-  .section { padding: 48px 20px; }
   .hero { padding: 48px 20px 0; }
   .hero-title { letter-spacing: -1px; }
   .mockup-stage { height: 320px; }
   .stats-row { grid-template-columns: repeat(2, 1fr); border-radius: 12px; }
   .stat-cell { padding: 28px 16px; }
   .stat-n { font-size: 36px; }
-  .process-grid { grid-template-columns: 1fr; }
-  .features-grid { grid-template-columns: 1fr; }
   .result-band { padding: 48px 20px; gap: 32px; }
   .result-items { grid-template-columns: 1fr; gap: 24px; }
   .result-n { font-size: 36px; }
-  .timeline-wrap { gap: 16px; }
   .timeline-heading { font-size: 26px; }
-  .timeline-node { width: 30px; height: 30px; font-size: 12px; }
-  .tech-row { gap: 8px; }
-  .tech-badge { font-size: 12px; padding: 8px 14px; }
   .topbar { padding: 16px 20px; }
-  .footer { padding: 32px 20px; }
 }
 </style>
 </head>
 <body>
-
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="topbar-logo">{{LOGO_TEXT}}<span>.</span></div>
-  <div class="topbar-tags">
-    {{TOPBAR_TAGS}}
+  <div class="topbar">
+    <div class="topbar-logo">{{LOGO_TEXT}}<span>.</span></div>
+    <div class="topbar-tags">{{TOPBAR_TAGS}}</div>
   </div>
-</div>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-header">
-    {{HERO_CONTENT}}
-  </div>
-
-  <!-- MOCKUP STAGE -->
-  <div class="mockup-stage" id="mockup-stage">
-    {{PHONE_FRAMES_HTML}}
-  </div>
-</section>
-
-<!-- STATS -->
-<section class="section">
-  <div class="stats-row">
-    {{STATS_CELLS}}
-  </div>
-</section>
-
-<!-- PROCESS -->
-<section class="section section-gray">
-  <p class="process-title">Development Process</p>
-  <div class="process-grid">
-    {{PROCESS_COLUMNS}}
-  </div>
-</section>
-
-<!-- CASE STUDY TIMELINE -->
-<section class="section">
-  <div class="timeline-wrap">
-    {{TIMELINE_ITEMS}}
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="section section-dark">
-  <p class="features-eyebrow">The Product</p>
-  <h2 class="features-heading">{{FEATURES_HEADING}}</h2>
-  <div class="features-grid">
-    {{FEATURE_CARDS}}
-  </div>
-</section>
-
-<!-- RESULT BAND -->
-<div class="result-band">
-  <div class="result-band-title">{{IMPACT_TITLE}}</div>
-  <div class="result-items">
-    {{IMPACT_METRICS}}
-  </div>
-</div>
-
-<!-- TECH STACK -->
-<section class="section">
-  <p class="process-title">Engineered With</p>
-  <div class="tech-row">
-    {{TECH_BADGES}}
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-brand">{{LOGO_TEXT}}<span>.</span></div>
-  <div class="footer-meta">AI-Generated Case Study &bull; {{YEAR}}</div>
-</footer>
-
+  <section class="hero">
+    <div class="hero-header">{{HERO_CONTENT}}</div>
+    <div class="mockup-stage" id="mockup-stage">{{PHONE_FRAMES_HTML}}</div>
+  </section>
+  {{SECTIONS}}
+  <footer class="footer">
+    <div class="footer-brand">{{LOGO_TEXT}}<span>.</span></div>
+    <div class="footer-meta">AI-Generated Case Study &bull; {{YEAR}}</div>
+  </footer>
 </body>
-</html>`;
+</html>
+`;
+
+// ─── TEMPLATE 2: MODERN MINIMAL (Clean, Grid-based) ──────────
+const TEMPLATE_MINIMAL = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+${BASE_HEAD}
+<style>
+.topbar { padding: 40px 60px; display: flex; justify-content: space-between; align-items: baseline; }
+.topbar-logo { font-family: var(--font-display); font-weight: 700; font-size: 24px; color: var(--text); text-transform: uppercase; letter-spacing: 2px; }
+.topbar-logo span { color: var(--accent); }
+
+.hero { padding: 0 60px 100px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; min-height: 80vh; }
+.hero-header { text-align: left; }
+.hero-eyebrow { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; border-left: 2px solid var(--accent); padding-left: 12px; }
+.hero-title { font-family: var(--font-display); font-size: clamp(40px, 5vw, 72px); font-weight: 700; line-height: 1.1; margin-bottom: 32px; }
+.hero-sub { font-size: 18px; color: var(--text-muted); line-height: 1.6; max-width: 480px; }
+
+.mockup-stage { position: relative; height: 600px; width: 100%; display: flex; align-items: center; justify-content: center; background: var(--bg-2); border-radius: 40px; overflow: hidden; }
+.phone { position: absolute; border-radius: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+{{PHONE_POSITIONS_CSS}}
+
+.stats-row { display: flex; gap: 40px; border-top: 1px solid var(--border); padding-top: 40px; }
+.stat-cell { flex: 1; }
+.stat-n { font-family: var(--font-display); font-size: 40px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.stat-l { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+
+.feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
+.feature-card { padding: 0; }
+.feature-icon { font-size: 32px; margin-bottom: 24px; }
+.feature-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+.feature-desc { color: var(--text-muted); line-height: 1.6; }
+
+.footer { padding: 100px 60px 60px; text-align: center; }
+.footer-brand { font-family: var(--font-display); font-size: 32px; font-weight: 700; margin-bottom: 24px; }
+
+@media (max-width: 1024px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 40px; }
+  .mockup-stage { height: 400px; }
+}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-logo">{{LOGO_TEXT}}<span>.</span></div>
+    <div class="tag-group">{{TOPBAR_TAGS}}</div>
+  </div>
+  <section class="hero">
+    <div class="hero-header">{{HERO_CONTENT}}</div>
+    <div class="mockup-stage">{{PHONE_FRAMES_HTML}}</div>
+  </section>
+  {{SECTIONS}}
+  <footer class="footer">
+    <div class="footer-brand">{{LOGO_TEXT}}</div>
+    <div class="footer-meta">© {{YEAR}} Case Study</div>
+  </footer>
+</body>
+</html>
+`;
+
+// ─── TEMPLATE 3: MODERN DARK (Glassmorphism, Glow) ──────────
+const TEMPLATE_DARK = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+${BASE_HEAD}
+<style>
+body { background: #050505; color: #fff; }
+.topbar { padding: 32px 60px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.topbar-logo { font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -1px; }
+.topbar-logo span { color: var(--accent); text-shadow: 0 0 20px var(--accent); }
+
+.hero { padding: 120px 60px; text-align: center; position: relative; overflow: hidden; background: radial-gradient(circle at 50% 0%, {{ACCENT_COLOR}}33 0%, transparent 50%); }
+.hero-title { font-family: var(--font-display); font-size: clamp(50px, 8vw, 100px); font-weight: 800; letter-spacing: -3px; line-height: 0.9; margin-bottom: 40px; }
+.hero-title em { font-style: normal; color: var(--accent); text-shadow: 0 0 30px var(--accent); }
+.hero-sub { font-size: 20px; color: rgba(255,255,255,0.6); max-width: 600px; margin: 0 auto 60px; line-height: 1.6; }
+
+.mockup-stage { display: flex; justify-content: center; align-items: center; gap: 40px; padding-top: 40px; }
+.phone { border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); backdrop-filter: blur(20px); box-shadow: 0 40px 100px rgba(0,0,0,0.5); }
+.phone-screen img { width: 100%; height: 100%; object-fit: cover; display: block; }
+{{PHONE_POSITIONS_CSS}}
+
+.section { padding: 100px 60px; }
+.section-dark { background: #0a0a0a; border-top: 1px solid rgba(255,255,255,0.05); }
+.feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 40px; }
+.feature-card:hover { border-color: var(--accent); box-shadow: 0 0 40px var(--accent-dim); }
+
+.result-band { background: linear-gradient(90deg, var(--accent), var(--secondary)); padding: 100px 60px; border-radius: 40px; margin: 0 60px; text-align: center; }
+.result-items { display: flex; justify-content: center; gap: 60px; margin-top: 40px; }
+.result-n { font-size: 64px; text-shadow: 0 4px 20px rgba(0,0,0,0.2); font-weight: 800; }
+.result-l { font-size: 16px; opacity: 0.8; }
+
+@media (max-width: 900px) {
+  .result-band { margin: 0 20px; padding: 60px 32px; }
+  .result-items { flex-direction: column; gap: 40px; }
+}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-logo">{{LOGO_TEXT}}<span>.</span></div>
+    <div class="topbar-tags">{{TOPBAR_TAGS}}</div>
+  </div>
+  <section class="hero">
+    {{HERO_CONTENT}}
+    <div class="mockup-stage">{{PHONE_FRAMES_HTML}}</div>
+  </section>
+  {{SECTIONS}}
+  <footer class="footer">
+    <div class="footer-brand">{{LOGO_TEXT}}</div>
+    <div class="footer-meta">Digital Experience &bull; {{YEAR}}</div>
+  </footer>
+</body>
+</html>
+`;
+;
 
 // ─── Token builder ────────────────────────────────────────────
 function buildTokens(design: DesignOutput, copy: CopyOutput, screenshotCount: number) {
@@ -589,8 +315,6 @@ function buildTokens(design: DesignOutput, copy: CopyOutput, screenshotCount: nu
     ? 'rgba(255,255,255,0.45)'
     : 'rgba(0,0,0,0.45)';
 
-  const phoneCSS = generatePhoneCSS(screenshotCount);
-
   const tags = [copy.category || 'Product', design.layout_style, design.mood]
     .map(t => `<span class="tag">${t}</span>`)
     .join('');
@@ -610,14 +334,25 @@ function buildTokens(design: DesignOutput, copy: CopyOutput, screenshotCount: nu
     TEXT_COLOR: isDark ? '#ffffff' : '#0a0a0a',
     TEXT_MUTED_COLOR: textMuted,
     BORDER_COLOR: border,
-    PHONE_POSITIONS_CSS: phoneCSS,
+    PHONE_POSITIONS_CSS: generatePhoneCSS(screenshotCount, design.layout_style),
     TOPBAR_TAGS: tags,
     YEAR: new Date().getFullYear().toString(),
   };
 }
 
 // ─── Phone layout generator ───────────────────────────────────
-function generatePhoneCSS(count: number): string {
+function generatePhoneCSS(count: number, layoutStyle: string): string {
+  if (layoutStyle === 'minimal-clean' || layoutStyle === 'feature-forward') {
+    return `
+      .phone-0 { width: 280px; height: 560px; right: 60px; top: 20px; z-index: 5; transform: rotate(2deg); }
+      .phone-1 { width: 240px; height: 480px; right: 280px; top: 100px; z-index: 4; transform: rotate(-4deg); opacity: 0.6; }
+      .phone-2 { width: 220px; height: 440px; right: 440px; top: 180px; z-index: 3; transform: rotate(-8deg); opacity: 0.4; }
+      @media (max-width: 1024px) {
+        .phone { position: relative; width: 160px !important; height: 320px !important; right: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; margin: 0 10px; }
+      }
+    `;
+  }
+
   const configs: Record<number, string> = {
     1: `
       .phone-0 { width: 220px; height: 440px; left: 50%; transform: translateX(-50%); z-index: 5; }`,
@@ -781,23 +516,39 @@ export async function runHtmlAgent(
   screenshotCount: number
 ): Promise<string> {
   const tokens = buildTokens(design, copy, screenshotCount);
+  
+  // Choose template
+  let scaffold = TEMPLATE_EDITORIAL;
+
+  // Build sections dynamically based on design.section_order
+  const sectionMap: Record<string, string> = {
+    stats: `<section class="section"><div class="stats-row">${buildStats(copy.stats)}</div></section>`,
+    process: `<section class="section section-gray"><p class="process-title">Process</p><div class="process-grid">${buildProcess(copy.process, design)}</div></section>`,
+    problem: `<section class="section"><div class="timeline-wrap">${buildTimeline(copy)}</div></section>`,
+    features: `<section class="section section-dark"><p class="features-eyebrow">Product</p><h2 class="features-heading">${copy.features_heading ?? 'Core Features'}</h2><div class="features-grid">${buildFeatures(copy.features)}</div></section>`,
+    result: `<div class="result-band"><div class="result-band-title">${copy.result.heading}</div><div class="result-items">${buildImpact(copy.impact)}</div></div>`,
+    tech: `<section class="section"><p class="process-title">Built With</p><div class="tech-row">${buildTechBadges(copy.tech_badges)}</div></section>`,
+  };
+
+  if (design.layout_style === 'minimal-grid' || design.layout_style === 'impact-metrics') {
+    scaffold = TEMPLATE_MINIMAL;
+  } else if (design.mood === 'dark-luxury' || design.bg_color === '#000000' || design.bg_color === '#050505') {
+    scaffold = TEMPLATE_DARK;
+  }
+
+  const activeSections = (design.section_order || ["stats", "process", "features", "result", "tech"])
+    .map(s => sectionMap[s])
+    .filter(Boolean)
+    .join('\n');
+
   const sections = {
-    PROCESS_HEADING: 'Development Process',
-    PROCESS_COLUMNS: buildProcess(copy.process, design),
-    STATS_CELLS: buildStats(copy.stats),
-    TIMELINE_ITEMS: buildTimeline(copy),
-    FEATURES_HEADING: copy.features_heading ?? 'Core Product Features',
-    FEATURE_CARDS: buildFeatures(copy.features),
-    IMPACT_TITLE: copy.result.heading,
-    IMPACT_METRICS: buildImpact(copy.impact),
-    TECH_HEADING: 'Engineered With',
-    TECH_BADGES: buildTechBadges(copy.tech_badges),
+    SECTIONS: activeSections,
     PHONE_FRAMES_HTML: buildPhoneFrames(screenshotCount),
   };
 
   const heroHtml = await generateUniqueHero(model, design, copy);
   
-  let html = HTML_SCAFFOLD;
+  let html = scaffold;
   const allTokens = { ...tokens, ...sections, HERO_CONTENT: heroHtml };
   for (const [key, value] of Object.entries(allTokens)) {
     html = html.replace(new RegExp(`{{${key}}}`, 'g'), value);
@@ -814,24 +565,35 @@ export async function streamHtmlAgent(
 ) {
   const client = getClient(model.provider);
   const tokens = buildTokens(design, copy, screenshotCount);
-  const sections = {
-    PROCESS_HEADING: 'Development Process',
-    PROCESS_COLUMNS: buildProcess(copy.process, design),
-    STATS_CELLS: buildStats(copy.stats),
-    TIMELINE_ITEMS: buildTimeline(copy),
-    FEATURES_HEADING: copy.features_heading ?? 'Core Product Features',
-    FEATURE_CARDS: buildFeatures(copy.features),
-    IMPACT_TITLE: copy.result.heading,
-    IMPACT_METRICS: buildImpact(copy.impact),
-    TECH_HEADING: 'Engineered With',
-    TECH_BADGES: buildTechBadges(copy.tech_badges),
-    PHONE_FRAMES_HTML: buildPhoneFrames(screenshotCount),
+  
+  // Choose template
+  let scaffold = TEMPLATE_EDITORIAL;
+  if (design.layout_style === 'minimal-grid' || design.layout_style === 'impact-metrics') {
+    scaffold = TEMPLATE_MINIMAL;
+  } else if (design.mood === 'dark-luxury' || design.bg_color === '#000000' || design.bg_color === '#050505') {
+    scaffold = TEMPLATE_DARK;
+  }
+
+  // Build sections dynamically
+  const sectionMap: Record<string, string> = {
+    stats: `<section class="section"><div class="stats-row">${buildStats(copy.stats)}</div></section>`,
+    process: `<section class="section section-gray"><p class="process-title">Process</p><div class="process-grid">${buildProcess(copy.process, design)}</div></section>`,
+    problem: `<section class="section"><div class="timeline-wrap">${buildTimeline(copy)}</div></section>`,
+    features: `<section class="section section-dark"><p class="features-eyebrow">Product</p><h2 class="features-heading">${copy.features_heading ?? 'Core Features'}</h2><div class="features-grid">${buildFeatures(copy.features)}</div></section>`,
+    result: `<div class="result-band"><div class="result-band-title">${copy.result.heading}</div><div class="result-items">${buildImpact(copy.impact)}</div></div>`,
+    tech: `<section class="section"><p class="process-title">Built With</p><div class="tech-row">${buildTechBadges(copy.tech_badges)}</div></section>`,
   };
+
+  const activeSections = (design.section_order || ["stats", "process", "features", "result", "tech"])
+    .map(s => sectionMap[s])
+    .filter(Boolean)
+    .join('\n');
 
   const prompt = `
     Generate ONLY the inner hero HTML for a ${design.mood} app case study.
     App: "${copy.hero_headline}" — ${copy.hero_sub}
     Mood: ${design.mood}
+    Layout: ${design.layout_style}
     Accent color CSS var: var(--accent)
     Text color CSS var: var(--text)
     Muted color CSS var: var(--text-muted)
@@ -852,12 +614,12 @@ export async function streamHtmlAgent(
   return (async function* () {
     let heroHtml = '';
     
-    const parts = HTML_SCAFFOLD.split('{{HERO_CONTENT}}');
+    const parts = scaffold.split('{{HERO_CONTENT}}');
     const preHero = parts[0];
     const postHero = parts[1];
     
     let preHtml = preHero;
-    const allTokens = { ...tokens, ...sections };
+    const allTokens = { ...tokens, SECTIONS: activeSections, PHONE_FRAMES_HTML: buildPhoneFrames(screenshotCount) };
     for (const [key, value] of Object.entries(allTokens)) {
       preHtml = preHtml.replace(new RegExp(`{{${key}}}`, 'g'), value);
     }
