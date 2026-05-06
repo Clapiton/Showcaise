@@ -36,16 +36,46 @@ export default function UploadForm() {
     e.preventDefault();
     resetCurrent();
     
-    // Convert files to base64
-    const base64Screenshots = await Promise.all(
-      screenshots.map((file) => {
-        return new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
-      })
-    );
+    // Convert files to base64 with compression
+    const compressImage = (file: File): Promise<string> => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            // Max 1200px width/height
+            const MAX_SIZE = 1200;
+            if (width > height) {
+              if (width > MAX_SIZE) {
+                height *= MAX_SIZE / width;
+                width = MAX_SIZE;
+              }
+            } else {
+              if (height > MAX_SIZE) {
+                width *= MAX_SIZE / height;
+                height = MAX_SIZE;
+              }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            
+            // Compress to JPEG 0.7
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
+          };
+          img.src = e.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+
+    const base64Screenshots = await Promise.all(screenshots.map(compressImage));
 
     setFormData({
       appName,

@@ -40,16 +40,34 @@ export async function runHtmlAgent(
     ${JSON.stringify(copy, null, 2)}
 
     INSTRUCTIONS FOR SCREENSHOTS:
-    The following screenshot URLs are available. Use them as src for your <img> tags within the mockups:
-    ${screenshots.map((url, i) => `Screenshot ${i + 1}: ${url}`).join('\n')}
+    I have provided ${screenshots.length} screenshots. 
+    Use the following exact strings as 'src' for your <img> tags where appropriate:
+    ${screenshots.map((_, i) => `PLACEHOLDER_SCREENSHOT_${i}`).join(', ')}
 
     Return ONLY the raw HTML content starting with <!DOCTYPE html>.
   `;
 
+  console.log(`--- HTML AGENT: CALLING MODEL ${model.id} ---`);
   const response = await client.chat.completions.create({
     model: model.id,
     messages: [{ role: 'user', content: prompt }],
   });
 
-  return response.choices[0].message.content || '';
+  console.log(`--- HTML AGENT: MODEL RESPONSE RECEIVED ---`);
+  let html = response.choices[0].message.content || '';
+
+  // Strip markdown code blocks if present
+  if (html.includes('```html')) {
+    html = html.split('```html')[1].split('```')[0].trim();
+  } else if (html.includes('```')) {
+    html = html.split('```')[1].split('```')[0].trim();
+  }
+
+  // Post-process to replace placeholders with actual data URIs
+  screenshots.forEach((url, i) => {
+    const placeholder = new RegExp(`PLACEHOLDER_SCREENSHOT_${i}`, 'g');
+    html = html.replace(placeholder, url);
+  });
+
+  return html;
 }
