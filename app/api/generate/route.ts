@@ -7,13 +7,15 @@ export const runtime = 'edge';
 
 export async function POST(req: Request) {
   try {
-    const { appName, tagline, description, design } = await req.json();
+    const { appName, tagline, description, design, modelPreference } = await req.json();
     const availability = await buildAvailabilityMap();
     
     const result = await runWithFallback(
       'copy',
       (model) => runCopyAgent(model, appName, tagline, description, design),
-      availability
+      availability,
+      false,
+      modelPreference
     );
     
     return NextResponse.json({

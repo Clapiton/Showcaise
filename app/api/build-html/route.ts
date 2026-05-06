@@ -8,13 +8,12 @@ export const runtime = 'edge';
 export async function POST(req: Request) {
   console.log('--- API/BUILD-HTML: START ---');
   try {
-    const body = await req.json();
+    const { design, copy, screenshotCount, modelPreference } = await req.json();
     console.log('--- API/BUILD-HTML: BODY PARSED ---');
-    const { design, copy, screenshotCount } = body;
     const availability = await buildAvailabilityMap();
     
-    // For now, we'll use gpt-4o-mini directly for streaming to ensure reliability
-    const model = MODEL_REGISTRY['gpt-5'];
+    // Dynamically pick the model based on preference
+    const model = pickModel('html', availability, false, modelPreference);
     const stream = await streamHtmlAgent(model, design, copy, screenshotCount);
     
     const encoder = new TextEncoder();

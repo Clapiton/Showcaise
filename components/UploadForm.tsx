@@ -2,15 +2,13 @@
 
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, ChevronRight, Layout, Type, Palette } from 'lucide-react';
+import { Upload, X, ChevronRight, Layout, Type, Palette, Zap, FileText, Code } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 
 export default function UploadForm() {
   const router = useRouter();
-  const setFormData = useStore((state) => state.setFormData);
-  const resetCurrent = useStore((state) => state.resetCurrent);
-  const savedData = useStore((state) => state.formData);
+  const { setFormData, resetCurrent, formData: savedData, modelPrefs, setModelPrefs } = useStore();
   
   const [appName, setAppName] = useState(savedData?.appName || '');
   const [tagline, setTagline] = useState(savedData?.tagline || '');
@@ -141,6 +139,60 @@ export default function UploadForm() {
               rows={8}
               className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none resize-none"
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Advanced Model Selection */}
+      <div className="bg-slate-900/30 border border-slate-800/50 rounded-2xl p-6 space-y-6">
+        <div className="flex items-center gap-2 text-emerald-500 mb-2">
+          <Zap size={20} />
+          <h3 className="font-semibold text-lg">AI Pipeline Configuration</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400 flex items-center gap-2">
+              <Palette size={14} /> Design Agent
+            </label>
+            <select
+              value={modelPrefs.design}
+              onChange={(e) => setModelPrefs({ ...modelPrefs, design: e.target.value })}
+              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+            >
+              <option value="gpt-5">GPT-5 (Flagship)</option>
+              <option value="gpt-4o">GPT-4o (Vision Pro)</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400 flex items-center gap-2">
+              <FileText size={14} /> Copy Agent
+            </label>
+            <select
+              value={modelPrefs.copy}
+              onChange={(e) => setModelPrefs({ ...modelPrefs, copy: e.target.value })}
+              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+            >
+              <option value="gpt-5">GPT-5 (Analytical)</option>
+              <option value="deepseek-v4-pro">DeepSeek V4 Pro (Reasoning)</option>
+              <option value="deepseek-v4-flash">DeepSeek V4 Flash (Fast)</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400 flex items-center gap-2">
+              <Code size={14} /> HTML Agent
+            </label>
+            <select
+              value={modelPrefs.html}
+              onChange={(e) => setModelPrefs({ ...modelPrefs, html: e.target.value })}
+              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+            >
+              <option value="gpt-5">GPT-5 (Pro Design)</option>
+              <option value="deepseek-v4-pro">DeepSeek V4 Pro (Complex)</option>
+              <option value="gpt-4o">GPT-4o (Standard)</option>
+            </select>
           </div>
         </div>
       </div>

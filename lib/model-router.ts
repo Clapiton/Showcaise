@@ -18,26 +18,33 @@ export const MODEL_REGISTRY: Record<string, ModelConfig> = {
     supportsVision: true,
     priority: { design: 0, copy: 0, html: 0 },
   },
-  'gpt-5-mini': {
-    id: 'gpt-5-mini',
-    provider: 'openai',
+  'deepseek-v4-pro': {
+    id: 'deepseek-v4-pro',
+    provider: 'deepseek',
     capabilities: ['copy', 'html'],
-    supportsVision: true,
-    priority: { design: 1, copy: 1, html: 1 },
+    supportsVision: false,
+    priority: { design: 3, copy: 1, html: 1 },
+  },
+  'deepseek-v4-flash': {
+    id: 'deepseek-v4-flash',
+    provider: 'deepseek',
+    capabilities: ['copy', 'html'],
+    supportsVision: false,
+    priority: { design: 4, copy: 2, html: 2 },
   },
   'gpt-4o': {
     id: 'gpt-4o',
     provider: 'openai',
     capabilities: ['design', 'copy', 'html'],
     supportsVision: true,
-    priority: { design: 2, copy: 2, html: 3 },
+    priority: { design: 1, copy: 3, html: 4 },
   },
-  'deepseek-chat': {
-    id: 'deepseek-chat',
-    provider: 'deepseek',
+  'gpt-4o-mini': {
+    id: 'gpt-4o-mini',
+    provider: 'openai',
     capabilities: ['copy', 'html'],
-    supportsVision: false,
-    priority: { design: 3, copy: 3, html: 2 },
+    supportsVision: true,
+    priority: { design: 2, copy: 4, html: 5 },
   },
 };
 

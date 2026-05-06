@@ -8,67 +8,83 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GeneratingPage() {
   const router = useRouter();
-  const { formData, designData, copyData, setDesignData, setCopyData, setHtmlData } = useStore();
+    const { formData, designData, copyData, modelPrefs, setDesignData, setCopyData, setHtmlData } = useStore();
+    
+    const [step, setStep] = useState(0);
+    const [error, setError] = useState<string | null>(null);
+    const [models, setModels] = useState<Record<number, string>>({
+      1: 'GPT-5',
+      2: 'GPT-5',
+      3: 'GPT-5'
+    });
   
-  const [step, setStep] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [models, setModels] = useState<Record<number, string>>({
-    1: 'GPT-4o Vision',
-    2: 'GPT-4o',
-    3: 'DeepSeek Chat'
-  });
-
-  useEffect(() => {
-    if (!formData) {
-      router.push('/');
-      return;
-    }
-
-    async function runPipeline() {
-      try {
-        // Step 1: Analyze Design
-        setStep(1);
-        const designRes = await fetch('/api/analyze', {
-          method: 'POST',
-          body: JSON.stringify({
-            appName: formData?.appName,
-            category: formData?.category,
-            screenshots: formData?.screenshots,
-          }),
-        });
-        const designJson = await designRes.json();
-        if (designJson.error) throw new Error(designJson.error);
-        
-        setDesignData(designJson.data);
-        setModels(prev => ({ ...prev, 1: designJson.modelId }));
-
-        // Step 2: Write Copy
-        setStep(2);
-        const copyRes = await fetch('/api/generate', {
-          method: 'POST',
-          body: JSON.stringify({
-            appName: formData?.appName,
-            tagline: formData?.tagline,
-            description: formData?.description,
-            design: designJson.data,
-          }),
-        });
-        const copyJson = await copyRes.json();
-        if (copyJson.error) throw new Error(copyJson.error);
-        
-        setCopyData(copyJson.data);
-        setModels(prev => ({ ...prev, 2: copyJson.modelId }));
-
-        // Step 3: Build HTML (Streaming)
-        setStep(3);
-        const htmlRes = await fetch('/api/build-html', {
-          method: 'POST',
-          body: JSON.stringify({
-            design: designJson.data,
-            copy: copyJson.data,
-            screenshotCount: formData?.screenshots?.length || 0,
-          }),
-        });
+    useEffect(() => {
+      if (!formData) {
+        router.push('/');
+        return;
+      }
+  
+      async function runPipeline() {
+        try {
+          // Step 1: Analyze Design
+          setStep(1);
+          const designRes = await fetch('/api/analyze', {
+            method: 'POST',
+            body: JSON.stringify({
+              appName: formData?.appName,
+              category: formData?.category,
+              screenshots: formData?.screenshots,
+              modelPreference: modelPrefs.design,
+            }),
+          });
+  
+          // Read stream for analyze (might have keep-alive spaces)
+          const designReader = designRes.body?.getReader();
+          const designDecoder = new TextDecoder();
+          let designRaw = '';
+          if (designReader) {
+            while (true) {
+              const { done, value } = await designReader.read();
+              if (done) break;
+              designRaw += designDecoder.decode(value);
+            }
+          }
+          
+          const designJson = JSON.parse(designRaw.trim());
+          if (designJson.error) throw new Error(designJson.error);
+          
+          setDesignData(designJson.data);
+          setModels(prev => ({ ...prev, 1: designJson.modelId }));
+  
+          // Step 2: Write Copy
+          setStep(2);
+          const copyRes = await fetch('/api/generate', {
+            method: 'POST',
+            body: JSON.stringify({
+              appName: formData?.appName,
+              tagline: formData?.tagline,
+              description: formData?.description,
+              design: designJson.data,
+              modelPreference: modelPrefs.copy,
+            }),
+          });
+          const copyJson = await copyRes.json();
+          if (copyJson.error) throw new Error(copyJson.error);
+          
+          setCopyData(copyJson.data);
+          setModels(prev => ({ ...prev, 2: copyJson.modelId }));
+  
+          // Step 3: Build HTML (Streaming)
+          setStep(3);
+          const htmlRes = await fetch('/api/build-html', {
+            method: 'POST',
+            body: JSON.stringify({
+              design: designJson.data,
+              copy: copyJson.data,
+              screenshotCount: formData?.screenshots?.length || 0,
+              modelPreference: modelPrefs.html,
+            }),
+          });
 
         if (!htmlRes.ok) {
           const err = await htmlRes.json();
