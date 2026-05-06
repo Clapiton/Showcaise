@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { Download, FileText, Image as ImageIcon, Archive, RefreshCw, ChevronLeft, Layout, Share2 } from 'lucide-react';
@@ -8,13 +8,26 @@ import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import JSZip from 'jszip';
 
-export default function PreviewPage() {
+export default function PreviewPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const { htmlData, formData } = useStore();
+  const { htmlData, formData, portfolios, setHtmlData, setFormData } = useStore();
   const [exporting, setExporting] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  if (!htmlData) {
+  // Load from portfolios list if not in current state
+  useEffect(() => {
+    if (!htmlData && params.id !== 'result') {
+      const portfolio = portfolios.find(p => p.id === params.id);
+      if (portfolio) {
+        setHtmlData(portfolio.htmlData);
+        setFormData(portfolio.formData);
+      } else {
+        router.push('/');
+      }
+    }
+  }, [params.id, htmlData, portfolios, setHtmlData, setFormData, router]);
+
+  if (!htmlData && params.id === 'result') {
     if (typeof window !== 'undefined') router.push('/');
     return null;
   }
@@ -78,7 +91,9 @@ export default function PreviewPage() {
       const zip = new JSZip();
       
       // Add HTML
-      zip.file('index.html', htmlData);
+      if (htmlData) {
+        zip.file('index.html', htmlData);
+      }
       
       // Add Hero Image
       const iframe = iframeRef.current;
@@ -201,7 +216,7 @@ export default function PreviewPage() {
           </div>
           <iframe
             ref={iframeRef}
-            srcDoc={htmlData}
+            srcDoc={htmlData || undefined}
             className="w-full h-full border-none"
             title="Preview"
           />

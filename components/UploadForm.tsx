@@ -9,6 +9,7 @@ import { useStore } from '@/lib/store';
 export default function UploadForm() {
   const router = useRouter();
   const setFormData = useStore((state) => state.setFormData);
+  const resetCurrent = useStore((state) => state.resetCurrent);
   
   const [appName, setAppName] = useState('');
   const [tagline, setTagline] = useState('');
@@ -33,6 +34,7 @@ export default function UploadForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    resetCurrent();
     
     // Convert files to base64
     const base64Screenshots = await Promise.all(

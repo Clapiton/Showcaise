@@ -16,7 +16,7 @@ export const MODEL_REGISTRY: Record<string, ModelConfig> = {
     provider: 'openai',
     capabilities: ['design', 'copy', 'html'],
     supportsVision: true,
-    priority: { design: 1, copy: 1, html: 1 },
+    priority: { design: 1, copy: 1, html: 2 },
   },
   'gpt-4o-mini': {
     id: 'gpt-4o-mini',
@@ -30,7 +30,7 @@ export const MODEL_REGISTRY: Record<string, ModelConfig> = {
     provider: 'deepseek',
     capabilities: ['copy', 'html'],
     supportsVision: false,
-    priority: { design: 3, copy: 3, html: 2 },
+    priority: { design: 3, copy: 3, html: 1 },
   },
 };
 

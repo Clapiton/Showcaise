@@ -29,7 +29,7 @@ export default function Home() {
       
       <footer className="border-t border-slate-900 py-12 mt-20">
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 text-sm">
-          <p>© 2024 Showcaise. Built with GPT-4o & Gemini.</p>
+          <p>© 2024 Showcaise. Built with GPT-4o, Gemini & DeepSeek.</p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Terms</a>

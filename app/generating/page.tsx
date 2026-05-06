@@ -59,9 +59,29 @@ export default function GeneratingPage() {
             screenshots: formData?.screenshots,
           }),
         });
-        const html = await htmlRes.json();
-        if (html.error) throw new Error(html.error);
-        setHtmlData(html.html);
+        const htmlData = await htmlRes.json();
+        if (htmlData.error) throw new Error(htmlData.error);
+        
+        const finalHtml = htmlData.html;
+        setHtmlData(finalHtml);
+
+        // Save to persistent storage
+        const currentFormData = formData;
+        if (currentFormData) {
+          const addPortfolio = useStore.getState().addPortfolio;
+          addPortfolio({
+            id: Date.now().toString(),
+            name: currentFormData.appName,
+            category: currentFormData.category,
+            date: new Date().toLocaleDateString('en-US', { 
+              month: 'long', 
+              day: 'numeric', 
+              year: 'numeric' 
+            }),
+            htmlData: finalHtml,
+            formData: currentFormData
+          });
+        }
 
         setStep(4);
         setTimeout(() => {
