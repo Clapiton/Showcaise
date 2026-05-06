@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎨 Showcaise
 
-## Getting Started
+**Turn your app into a masterpiece with a multi-agent AI pipeline.**
 
-First, run the development server:
+Showcaise is an intelligent case study generator that moves beyond templates. It uses a specialized trio of AI agents to analyze your app's visual language, write compelling STAR-format copy, and build a unique, responsive editorial page from scratch.
+
+---
+
+## 🧠 Core Philosophy: "No Fixed Templates"
+
+Unlike traditional builders, Showcaise doesn't just fill in blanks. Our AI agents decide the layout, color theme, and structure based on your app's personality:
+
+- **App feels dark + minimal?** AI generates obsidian backgrounds with emerald accents.
+- **App feels bright + playful?** AI builds bold color blocks and rounded grid layouts.
+- **App feels corporate + trust?** AI creates clean, data-forward timeline views.
+
+---
+
+## 🏗️ The Multi-Agent Pipeline
+
+We use a sequence of state-of-the-art models, each picked for what it does best:
+
+1.  **Design Agent (GPT-4o Vision)**: Analyzes your screenshots to extract brand colors, typography pairings, and a visual mood.
+2.  **Copy Agent (Claude Sonnet)**: Writes a structured case study in STAR format (Situation, Task, Action, Result), tone-matched to your design.
+3.  **HTML Agent (Gemini 1.5 Pro)**: Takes the design JSON and copy, and generates a **complete, self-contained HTML file** with custom CSS and animations.
+
+---
+
+## ✨ Features
+
+- **🚀 Multi-Model Fallback**: Smart routing across OpenAI, Anthropic, Google, and DeepSeek ensures your generation never fails.
+- **🔐 Secure Access**: Integrated with **Auth.js** for secure user accounts and session management.
+- **📱 Responsive Preview**: Live iframe preview of your generated case study.
+- **📦 High-Res Exports**: Export your work as a PDF, high-res hero banners, or a ZIP bundle of individual screen mockups.
+- **⚡ Built with Next.js 16**: Utilizing the latest App Router patterns and Server Actions.
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Prerequisites
+
+- Node.js 20+
+- API Keys for OpenAI, Anthropic, Google (Gemini), and DeepSeek.
+
+### 2. Environment Setup
+
+Create a `.env` file in the root:
+
+```env
+# AI API Keys
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GOOGLE_GENERATIVE_AI_API_KEY=
+DEEPSEEK_API_KEY=
+
+# NextAuth Configuration
+AUTH_SECRET= # Generate with 'npx auth secret'
+```
+
+### 3. Installation
+
+```bash
+npm install
+```
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to start creating.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Project Structure
 
-## Learn More
+- `/app`: Next.js App Router (Pages, API Routes, Actions)
+- `/components`: Reusable UI components
+- `/lib`: Core logic (AI Agents, Model Router, Export Engine)
+- `/auth.ts`: Auth.js configuration
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT © 2024 Showcaise. Built with ❤️ by Antigravity.
