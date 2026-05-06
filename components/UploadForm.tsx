@@ -10,13 +10,16 @@ export default function UploadForm() {
   const router = useRouter();
   const setFormData = useStore((state) => state.setFormData);
   const resetCurrent = useStore((state) => state.resetCurrent);
+  const savedData = useStore((state) => state.formData);
   
-  const [appName, setAppName] = useState('');
-  const [tagline, setTagline] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Marketplace');
-  const [platform, setPlatform] = useState('Mobile');
-  const [screenshots, setScreenshots] = useState<File[]>([]);
+  const [appName, setAppName] = useState(savedData?.appName || '');
+  const [tagline, setTagline] = useState(savedData?.tagline || '');
+  const [description, setDescription] = useState(savedData?.description || '');
+  const [category, setCategory] = useState(savedData?.category || 'Marketplace');
+  const [platform, setPlatform] = useState(savedData?.platform || 'Mobile');
+  
+  // screenshots can be a mix of Files (new) and base64 strings (restored)
+  const [screenshots, setScreenshots] = useState<(File | string)[]>(savedData?.screenshots || []);
 
   const onDrop = (acceptedFiles: File[]) => {
     setScreenshots((prev) => [...prev, ...acceptedFiles].slice(0, 8));
@@ -34,10 +37,13 @@ export default function UploadForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    resetCurrent();
+    // We don't call resetCurrent here because we want to preserve input if they go back
+    // resetCurrent(); 
     
     // Convert files to base64 with compression
-    const compressImage = (file: File): Promise<string> => {
+    const processImage = (item: File | string): Promise<string> => {
+      if (typeof item === 'string') return Promise.resolve(item);
+      
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -46,8 +52,6 @@ export default function UploadForm() {
             const canvas = document.createElement('canvas');
             let width = img.width;
             let height = img.height;
-            
-            // Max 1200px width/height
             const MAX_SIZE = 1200;
             if (width > height) {
               if (width > MAX_SIZE) {
@@ -60,22 +64,19 @@ export default function UploadForm() {
                 height = MAX_SIZE;
               }
             }
-            
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx?.drawImage(img, 0, 0, width, height);
-            
-            // Compress to JPEG 0.7
             resolve(canvas.toDataURL('image/jpeg', 0.7));
           };
           img.src = e.target?.result as string;
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(item);
       });
     };
 
-    const base64Screenshots = await Promise.all(screenshots.map(compressImage));
+    const base64Screenshots = await Promise.all(screenshots.map(processImage));
 
     setFormData({
       appName,
@@ -164,10 +165,10 @@ export default function UploadForm() {
 
         {screenshots.length > 0 && (
           <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
-            {screenshots.map((file, index) => (
+            {screenshots.map((item, index) => (
               <div key={index} className="relative group aspect-[9/16] rounded-lg overflow-hidden border border-slate-800">
                 <img
-                  src={URL.createObjectURL(file)}
+                  src={typeof item === 'string' ? item : URL.createObjectURL(item)}
                   className="w-full h-full object-cover"
                   alt="preview"
                 />
