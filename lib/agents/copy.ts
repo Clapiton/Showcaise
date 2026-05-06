@@ -4,6 +4,8 @@ import { DesignOutput } from './design';
 export interface CopyOutput {
   hero_headline: string;
   hero_sub: string;
+  category?: string;
+  features_heading?: string;
   problem: {
     heading: string;
     narrative: string;
