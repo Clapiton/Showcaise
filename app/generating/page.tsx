@@ -59,7 +59,7 @@ export default function GeneratingPage() {
         setCopyData(copyJson.data);
         setModels(prev => ({ ...prev, 2: copyJson.modelId }));
 
-        // Step 3: Build HTML
+        // Step 3: Build HTML (Streaming)
         setStep(3);
         const htmlRes = await fetch('/api/build-html', {
           method: 'POST',
@@ -69,11 +69,35 @@ export default function GeneratingPage() {
             screenshotCount: formData?.screenshots?.length || 0,
           }),
         });
-        const htmlJson = await htmlRes.json();
-        if (htmlJson.error) throw new Error(htmlJson.error);
+
+        if (!htmlRes.ok) {
+          const err = await htmlRes.json();
+          throw new Error(err.error || 'Failed to build HTML');
+        }
         
-        let finalHtml = htmlJson.html;
-        setModels(prev => ({ ...prev, 3: htmlJson.modelId }));
+        const modelId = htmlRes.headers.get('X-Model-Id') || 'unknown';
+        setModels(prev => ({ ...prev, 3: modelId }));
+
+        // Read the stream
+        const reader = htmlRes.body?.getReader();
+        const decoder = new TextDecoder();
+        let streamedHtml = '';
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            streamedHtml += chunk;
+            setHtmlData(streamedHtml); // Update UI in real-time
+          }
+        }
+        
+        let finalHtml = streamedHtml;
+        // Clean up markdown markers if the model included them despite instructions
+        if (finalHtml.includes('```html')) {
+          finalHtml = finalHtml.split('```html')[1].split('```')[0].trim();
+        }
 
         // Client-side placeholder replacement
         if (formData?.screenshots) {
@@ -98,7 +122,7 @@ export default function GeneratingPage() {
               day: 'numeric', 
               year: 'numeric' 
             }),
-            htmlData: htmlJson.html,
+            htmlData: finalHtml,
             formData: currentFormData
           });
         }

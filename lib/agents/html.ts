@@ -65,3 +65,35 @@ export async function runHtmlAgent(
 
   return html;
 }
+
+export async function streamHtmlAgent(
+  model: ModelConfig,
+  design: DesignOutput,
+  copy: CopyOutput,
+  screenshotCount: number
+) {
+  const client = getClient(model.provider);
+
+  const prompt = `
+    Generate a PREMIUM, EDITORIAL, self-contained HTML file for a case study. 
+    DESIGN SYSTEM:
+    - Background: ${design.bg_color}
+    - Mood: ${design.mood}
+    - Layout: ${design.layout_style}
+    
+    CONTENT DATA:
+    ${JSON.stringify(copy)}
+
+    INSTRUCTIONS FOR SCREENSHOTS:
+    I have provided ${screenshotCount} screenshots. 
+    Use the strings PLACEHOLDER_SCREENSHOT_0, PLACEHOLDER_SCREENSHOT_1, etc. as 'src' for <img> tags.
+
+    Return ONLY raw HTML content. No markdown code blocks.
+  `;
+
+  return await client.chat.completions.create({
+    model: model.id,
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
+  });
+}

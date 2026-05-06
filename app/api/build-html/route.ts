@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { buildAvailabilityMap } from '@/lib/model-router';
+import { buildAvailabilityMap, MODEL_REGISTRY } from '@/lib/model-router';
 import { runWithFallback } from '@/lib/agent-runner';
-import { runHtmlAgent } from '@/lib/agents/html';
+import { runHtmlAgent, streamHtmlAgent } from '@/lib/agents/html';
 
 export const runtime = 'edge';
 
@@ -13,17 +13,28 @@ export async function POST(req: Request) {
     const { design, copy, screenshotCount } = body;
     const availability = await buildAvailabilityMap();
     
-    console.log('--- API/BUILD-HTML: RUNNING AGENT ---');
-    const result = await runWithFallback(
-      'html',
-      (model) => runHtmlAgent(model, design, copy, screenshotCount),
-      availability
-    );
+    // For now, we'll use gpt-4o-mini directly for streaming to ensure reliability
+    const model = MODEL_REGISTRY['gpt-4o-mini'];
+    const stream = await streamHtmlAgent(model, design, copy, screenshotCount);
     
-    console.log('--- API/BUILD-HTML: DONE ---');
-    return NextResponse.json({ 
-      html: result.data, 
-      modelId: result.modelId 
+    const encoder = new TextEncoder();
+    const customStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          const text = chunk.choices[0]?.delta?.content || '';
+          if (text) {
+            controller.enqueue(encoder.encode(text));
+          }
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(customStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Model-Id': model.id,
+      },
     });
   } catch (error: any) {
     console.error('--- API/BUILD-HTML: ERROR ---', error);
