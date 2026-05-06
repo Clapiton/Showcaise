@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const availability = await buildAvailabilityMap();
     
     // For now, we'll use gpt-4o-mini directly for streaming to ensure reliability
-    const model = MODEL_REGISTRY['gpt-4o'];
+    const model = MODEL_REGISTRY['gpt-5'];
     const stream = await streamHtmlAgent(model, design, copy, screenshotCount);
     
     const encoder = new TextEncoder();

@@ -11,17 +11,24 @@ export interface ModelConfig {
 }
 
 export const MODEL_REGISTRY: Record<string, ModelConfig> = {
+  'gpt-5': {
+    id: 'gpt-5',
+    provider: 'openai',
+    capabilities: ['design', 'copy', 'html'],
+    supportsVision: true,
+    priority: { design: 0, copy: 0, html: 0 },
+  },
+  'gpt-5-mini': {
+    id: 'gpt-5-mini',
+    provider: 'openai',
+    capabilities: ['copy', 'html'],
+    supportsVision: true,
+    priority: { design: 1, copy: 1, html: 1 },
+  },
   'gpt-4o': {
     id: 'gpt-4o',
     provider: 'openai',
     capabilities: ['design', 'copy', 'html'],
-    supportsVision: true,
-    priority: { design: 1, copy: 1, html: 1 },
-  },
-  'gpt-4o-mini': {
-    id: 'gpt-4o-mini',
-    provider: 'openai',
-    capabilities: ['copy', 'html'],
     supportsVision: true,
     priority: { design: 2, copy: 2, html: 3 },
   },
