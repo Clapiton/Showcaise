@@ -51,9 +51,9 @@ export const useStore = create<PortfolioStore>()(
       htmlData: null,
       portfolios: [],
       modelPrefs: {
-        design: 'gpt-5',
-        copy: 'gpt-5',
-        html: 'gpt-5',
+        design: 'gpt-4o',
+        copy: 'deepseek-v4-flash',
+        html: 'deepseek-v4-flash',
       },
       setFormData: (formData) => set({ formData }),
       setDesignData: (designData) => set({ designData }),

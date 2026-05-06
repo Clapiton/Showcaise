@@ -30,6 +30,7 @@ export default function GeneratingPage() {
           setStep(1);
           const designRes = await fetch('/api/analyze', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               appName: formData?.appName,
               category: formData?.category,
@@ -38,7 +39,12 @@ export default function GeneratingPage() {
             }),
           });
   
-          // Read stream for analyze (might have keep-alive spaces)
+          if (!designRes.ok) {
+            const text = await designRes.text();
+            throw new Error(`Design analysis failed (${designRes.status}): ${text.slice(0, 100)}`);
+          }
+
+          // Read stream for analyze (has keep-alive spaces)
           const designReader = designRes.body?.getReader();
           const designDecoder = new TextDecoder();
           let designRaw = '';
@@ -46,11 +52,21 @@ export default function GeneratingPage() {
             while (true) {
               const { done, value } = await designReader.read();
               if (done) break;
-              designRaw += designDecoder.decode(value);
+              designRaw += designDecoder.decode(value, { stream: true });
             }
           }
           
-          const designJson = JSON.parse(designRaw.trim());
+          const cleanedDesignRaw = designRaw.trim();
+          if (!cleanedDesignRaw) throw new Error("Design analysis returned empty response");
+          
+          let designJson;
+          try {
+            designJson = JSON.parse(cleanedDesignRaw);
+          } catch (e) {
+            console.error('Failed to parse design JSON:', cleanedDesignRaw);
+            throw new Error("Failed to parse design data from AI");
+          }
+
           if (designJson.error) throw new Error(designJson.error);
           
           setDesignData(designJson.data);
@@ -60,6 +76,7 @@ export default function GeneratingPage() {
           setStep(2);
           const copyRes = await fetch('/api/generate', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               appName: formData?.appName,
               tagline: formData?.tagline,
@@ -68,6 +85,13 @@ export default function GeneratingPage() {
               modelPreference: modelPrefs.copy,
             }),
           });
+
+          if (!copyRes.ok) {
+            const text = await copyRes.text();
+            if (copyRes.status === 504) throw new Error("Copy generation timed out. Try using a faster model.");
+            throw new Error(`Copy generation failed (${copyRes.status}): ${text.slice(0, 100)}`);
+          }
+
           const copyJson = await copyRes.json();
           if (copyJson.error) throw new Error(copyJson.error);
           
@@ -78,6 +102,7 @@ export default function GeneratingPage() {
           setStep(3);
           const htmlRes = await fetch('/api/build-html', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               design: designJson.data,
               copy: copyJson.data,
@@ -85,74 +110,72 @@ export default function GeneratingPage() {
               modelPreference: modelPrefs.html,
             }),
           });
-
-        if (!htmlRes.ok) {
-          const err = await htmlRes.json();
-          throw new Error(err.error || 'Failed to build HTML');
-        }
-        
-        const modelId = htmlRes.headers.get('X-Model-Id') || 'unknown';
-        setModels(prev => ({ ...prev, 3: modelId }));
-
-        // Read the stream
-        const reader = htmlRes.body?.getReader();
-        const decoder = new TextDecoder();
-        let streamedHtml = '';
-
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            streamedHtml += chunk;
-            setHtmlData(streamedHtml); // Update UI in real-time
+ 
+          if (!htmlRes.ok) {
+            const text = await htmlRes.text();
+            throw new Error(`HTML build failed (${htmlRes.status}): ${text.slice(0, 100)}`);
           }
-        }
         
-        let finalHtml = streamedHtml;
-        // Clean up markdown markers if the model included them despite instructions
-        if (finalHtml.includes('```html')) {
-          finalHtml = finalHtml.split('```html')[1].split('```')[0].trim();
+          const modelId = htmlRes.headers.get('X-Model-Id') || 'unknown';
+          setModels(prev => ({ ...prev, 3: modelId }));
+  
+          // Read the stream
+          const reader = htmlRes.body?.getReader();
+          const decoder = new TextDecoder();
+          let streamedHtml = '';
+  
+          if (reader) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              const chunk = decoder.decode(value, { stream: true });
+              streamedHtml += chunk;
+              // Clean up markdown markers if the model included them despite instructions
+              const cleanedChunk = streamedHtml.replace(/```html?|```/g, '');
+              setHtmlData(cleanedChunk); // Update UI in real-time
+            }
+          }
+          
+          let finalHtml = streamedHtml.replace(/```html?|```/g, '').trim();
+  
+          // Client-side placeholder replacement
+          if (formData?.screenshots) {
+            formData.screenshots.forEach((url, i) => {
+              const placeholder = `PLACEHOLDER_SCREENSHOT_${i}`;
+              finalHtml = finalHtml.split(placeholder).join(url);
+            });
+          }
+  
+          setHtmlData(finalHtml);
+  
+          // Save to persistent storage
+          const currentFormData = formData;
+          if (currentFormData) {
+            const addPortfolio = useStore.getState().addPortfolio;
+            addPortfolio({
+              id: Date.now().toString(),
+              name: currentFormData.appName,
+              category: currentFormData.category,
+              date: new Date().toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+              }),
+              htmlData: finalHtml,
+              formData: currentFormData
+            });
+          }
+  
+          setStep(4);
+          setTimeout(() => {
+            router.push('/preview/result');
+          }, 2000);
+  
+        } catch (err: any) {
+          console.error('Pipeline error:', err);
+          setError(err.message || 'An unexpected error occurred in the generation pipeline.');
         }
-
-        // Client-side placeholder replacement
-        if (formData?.screenshots) {
-          formData.screenshots.forEach((url, i) => {
-            const placeholder = `PLACEHOLDER_SCREENSHOT_${i}`;
-            finalHtml = finalHtml.split(placeholder).join(url);
-          });
-        }
-
-        setHtmlData(finalHtml);
-
-        // Save to persistent storage
-        const currentFormData = formData;
-        if (currentFormData) {
-          const addPortfolio = useStore.getState().addPortfolio;
-          addPortfolio({
-            id: Date.now().toString(),
-            name: currentFormData.appName,
-            category: currentFormData.category,
-            date: new Date().toLocaleDateString('en-US', { 
-              month: 'long', 
-              day: 'numeric', 
-              year: 'numeric' 
-            }),
-            htmlData: finalHtml,
-            formData: currentFormData
-          });
-        }
-
-        setStep(4);
-        setTimeout(() => {
-          router.push('/preview/result');
-        }, 2000);
-
-      } catch (err: any) {
-        console.error('Pipeline error:', err);
-        setError(err.message);
       }
-    }
 
     runPipeline();
   }, [formData]);

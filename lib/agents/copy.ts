@@ -45,13 +45,76 @@ export async function runCopyAgent(
     Description: ${description}
     The mood is "${design.mood}". Tone-match the content to this mood.
     Return a JSON object with the structure defined in the specification.
+    Ensure all fields are present, especially the 'process' object with phase1, phase2, and phase3.
   `;
 
-  const response = await client.chat.completions.create({
-    model: model.id,
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-  });
+  try {
+    const response = await client.chat.completions.create({
+      model: model.id,
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
+    });
 
-  return JSON.parse(response.choices[0].message.content || '{}') as CopyOutput;
+    const content = response.choices[0].message.content || '{}';
+    const parsed = JSON.parse(content);
+    
+    // Defensive merging with defaults
+    return {
+      hero_headline: parsed.hero_headline || appName,
+      hero_sub: parsed.hero_sub || tagline,
+      category: parsed.category || 'Mobile App',
+      features_heading: parsed.features_heading || 'Key Features',
+      problem: {
+        heading: parsed.problem?.heading || 'The Challenge',
+        narrative: parsed.problem?.narrative || description,
+        bullets: parsed.problem?.bullets || ['Complexity', 'Friction', 'Poor UX'],
+      },
+      solution: {
+        heading: parsed.solution?.heading || 'The Solution',
+        bullets: parsed.solution?.bullets || ['Seamless Flow', 'Modern Design', 'Efficiency'],
+      },
+      result: {
+        heading: parsed.result?.heading || 'The Result',
+        bullets: parsed.result?.bullets || ['Higher Retention', 'Positive Feedback'],
+      },
+      stats: parsed.stats || [
+        { number: '99%', label: 'Uptime' },
+        { number: '2.5x', label: 'Faster' }
+      ],
+      features: parsed.features || [
+        { icon: '✨', title: 'Smart Sync', desc: 'Real-time updates across all devices.' }
+      ],
+      process: {
+        phase1: parsed.process?.phase1 || { title: 'Strategy', items: ['Discovery', 'Planning'] },
+        phase2: parsed.process?.phase2 || { title: 'Design', items: ['Wireframing', 'Prototyping'] },
+        phase3: parsed.process?.phase3 || { title: 'Build', items: ['Development', 'Testing'] },
+      },
+      impact: parsed.impact || [
+        { number: '10k+', label: 'Active Users' }
+      ],
+      tech_badges: parsed.tech_badges || [
+        { name: 'React Native', color: '#61DAFB' }
+      ],
+    };
+  } catch (error) {
+    console.error('Error in runCopyAgent:', error);
+    // Return a full default structure on total failure
+    return {
+      hero_headline: appName,
+      hero_sub: tagline,
+      category: 'Case Study',
+      problem: { heading: 'Challenge', narrative: description, bullets: [] },
+      solution: { heading: 'Solution', bullets: [] },
+      result: { heading: 'Result', bullets: [] },
+      stats: [],
+      features: [],
+      process: {
+        phase1: { title: 'Discovery', items: [] },
+        phase2: { title: 'Design', items: [] },
+        phase3: { title: 'Launch', items: [] },
+      },
+      impact: [],
+      tech_badges: [],
+    };
+  }
 }

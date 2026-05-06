@@ -61,11 +61,48 @@ export async function runDesignAgent(
     },
   ];
 
-  const response = await client.chat.completions.create({
-    model: model.id,
-    messages,
-    response_format: { type: 'json_object' },
-  });
+  try {
+    const response = await client.chat.completions.create({
+      model: model.id,
+      messages,
+      response_format: { type: 'json_object' },
+    });
 
-  return JSON.parse(response.choices[0].message.content || '{}') as DesignOutput;
+    const content = response.choices[0].message.content || '{}';
+    const parsed = JSON.parse(content);
+
+    return {
+      primary_color: parsed.primary_color || '#000000',
+      secondary_color: parsed.secondary_color || '#333333',
+      accent_color: parsed.accent_color || '#6366f1',
+      bg_color: parsed.bg_color || '#ffffff',
+      text_color: parsed.text_color || '#000000',
+      mood: parsed.mood || 'minimal-clean',
+      font_pairing: {
+        display: parsed.font_pairing?.display || 'Inter',
+        body: parsed.font_pairing?.body || 'Inter',
+      },
+      layout_style: parsed.layout_style || 'editorial',
+      section_order: parsed.section_order || ["hero", "problem", "features", "process", "stats", "result"],
+      hero_style: parsed.hero_style || 'fullbleed-mockup',
+      mockup_count: parsed.mockup_count || 3,
+      color_reasoning: parsed.color_reasoning || 'Default styling applied.',
+    };
+  } catch (error) {
+    console.error('Error in runDesignAgent:', error);
+    return {
+      primary_color: '#000000',
+      secondary_color: '#333333',
+      accent_color: '#6366f1',
+      bg_color: '#ffffff',
+      text_color: '#000000',
+      mood: 'minimal-clean',
+      font_pairing: { display: 'Inter', body: 'Inter' },
+      layout_style: 'editorial',
+      section_order: ["hero", "problem", "features", "process", "stats", "result"],
+      hero_style: 'fullbleed-mockup',
+      mockup_count: 3,
+      color_reasoning: 'Fallback defaults used due to error.',
+    };
+  }
 }
