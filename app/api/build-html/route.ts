@@ -14,14 +14,13 @@ export async function POST(req: Request) {
     const availability = await buildAvailabilityMap();
     
     // For now, we'll use gpt-4o-mini directly for streaming to ensure reliability
-    const model = MODEL_REGISTRY['gpt-4o-mini'];
+    const model = MODEL_REGISTRY['gpt-4o'];
     const stream = await streamHtmlAgent(model, design, copy, screenshotCount);
     
     const encoder = new TextEncoder();
     const customStream = new ReadableStream({
       async start(controller) {
-        for await (const chunk of stream) {
-          const text = chunk.choices[0]?.delta?.content || '';
+        for await (const text of stream) {
           if (text) {
             controller.enqueue(encoder.encode(text));
           }
