@@ -435,6 +435,24 @@ p  { font-size: 16px; line-height: 1.7; color: var(--text-muted); font-weight: 3
 
 // ─── Token builder ────────────────────────────────────────────
 function buildTokens(design: DesignOutput, copy: CopyOutput, screenshotCount: number) {
+  if (!copy || !design) {
+    return {
+      APP_NAME: 'Case Study',
+      DISPLAY_FONT: 'Inter',
+      BODY_FONT: 'Inter',
+      PRIMARY_COLOR: '#000000',
+      SECONDARY_COLOR: '#333333',
+      ACCENT_COLOR: '#6366f1',
+      BG_COLOR: '#ffffff',
+      BG_2_COLOR: '#f9f9f9',
+      TEXT_COLOR: '#000000',
+      TEXT_MUTED_COLOR: 'rgba(0,0,0,0.45)',
+      BORDER_COLOR: 'rgba(0,0,0,0.08)',
+      HERO_GRADIENT: 'none',
+      HERO_GLOW: 'none',
+      PHONE_POSITIONS_CSS: '',
+    };
+  }
 
   // Derive bg-2 and border from bg intelligently
   const isDark = isColorDark(design.bg_color);
@@ -512,6 +530,7 @@ function buildPhoneFrames(screenshotCount: number): string {
 }
 
 function buildStats(stats: CopyOutput['stats']): string {
+  if (!stats || !Array.isArray(stats)) return '';
   return stats.map(s => `
     <div class="stat-cell">
       <div class="stat-number">${s.number}</div>
@@ -521,10 +540,11 @@ function buildStats(stats: CopyOutput['stats']): string {
 }
 
 function buildTimeline(copy: CopyOutput): string {
+  if (!copy) return '';
   const items = [
-    { label: 'Problem', heading: copy.problem.heading, bullets: copy.problem.bullets, dot: '' },
-    { label: 'Solution', heading: copy.solution.heading, bullets: copy.solution.bullets, dot: 'accent' },
-    { label: 'Result', heading: copy.result.heading, bullets: copy.result.bullets, dot: 'accent' },
+    { label: 'Problem', heading: copy.problem?.heading || 'Challenge', bullets: copy.problem?.bullets || [], dot: '' },
+    { label: 'Solution', heading: copy.solution?.heading || 'Solution', bullets: copy.solution?.bullets || [], dot: 'accent' },
+    { label: 'Result', heading: copy.result?.heading || 'Result', bullets: copy.result?.bullets || [], dot: 'accent' },
   ];
   return items.map((item, i) => `
     <div class="timeline-item">
@@ -536,7 +556,7 @@ function buildTimeline(copy: CopyOutput): string {
         <p class="timeline-micro">${item.label}</p>
         <h2 class="timeline-heading">${item.heading}</h2>
         <ul class="bullet-list">
-          ${item.bullets.map(b => `
+          ${(item.bullets || []).map(b => `
             <li>
               <div class="bullet-dot ${item.dot}"></div>
               <p>${b}</p>
@@ -548,6 +568,7 @@ function buildTimeline(copy: CopyOutput): string {
 }
 
 function buildFeatures(features: CopyOutput['features']): string {
+  if (!features || !Array.isArray(features)) return '';
   return features.map(f => `
     <div class="feature-card">
       <div class="feature-icon">${f.icon}</div>
@@ -558,22 +579,25 @@ function buildFeatures(features: CopyOutput['features']): string {
 }
 
 function buildProcess(process: CopyOutput['process'], design: DesignOutput): string {
+  if (!process) return '';
   const pillColors = [
     { bg: 'color-mix(in srgb, #f5c842 25%, transparent)', color: '#7a6010' },
     { bg: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent)' },
     { bg: 'color-mix(in srgb, #7eb8f7 25%, transparent)', color: '#1a4a7a' },
   ];
-  return [process.phase1, process.phase2, process.phase3].map((phase, i) => `
+  const phases = [process.phase1, process.phase2, process.phase3].filter(Boolean);
+  return phases.map((phase, i) => `
     <div class="process-col">
-      <div class="process-pill" style="background:${pillColors[i].bg};color:${pillColors[i].color}">
-        ${phase.title}
+      <div class="process-pill" style="background:${pillColors[i % 3].bg};color:${pillColors[i % 3].color}">
+        ${phase?.title || 'Step'}
       </div>
-      ${phase.items.map(item => `<div class="process-item">${item}</div>`).join('')}
+      ${(phase?.items || []).map(item => `<div class="process-item">${item}</div>`).join('')}
     </div>`
   ).join('\n');
 }
 
 function buildImpact(impact: CopyOutput['impact']): string {
+  if (!impact || !Array.isArray(impact)) return '';
   return impact.map(m => `
     <div>
       <div class="stat-number">${m.number}</div>
@@ -583,6 +607,7 @@ function buildImpact(impact: CopyOutput['impact']): string {
 }
 
 function buildTechBadges(badges: CopyOutput['tech_badges']): string {
+  if (!badges || !Array.isArray(badges)) return '';
   return badges.map(b => `
     <div class="tech-badge">
       <div class="tech-dot" style="background:${b.color}"></div>
