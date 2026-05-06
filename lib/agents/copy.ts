@@ -40,12 +40,41 @@ export async function runCopyAgent(
   const client = getClient(model.provider);
 
   const prompt = `
-    Write high-converting case study copy for an app called "${appName}".
+    Write high-converting, editorial-grade case study copy for an app called "${appName}".
     Tagline: ${tagline}
     Description: ${description}
-    The mood is "${design.mood}". Tone-match the content to this mood.
-    Return a JSON object with the structure defined in the specification.
-    Ensure all fields are present, especially the 'process' object with phase1, phase2, and phase3.
+    The mood is "${design.mood}". Tone-match the content to this mood (e.g., if dark-luxury, be sophisticated; if vibrant, be energetic).
+    
+    Return a JSON object with this exact structure:
+    {
+      "hero_headline": "A bold, punchy headline",
+      "hero_sub": "A 2-3 sentence engaging subtitle",
+      "category": "e.g. Fintech, E-commerce, Social",
+      "features_heading": "e.g. Revolutionizing the Experience",
+      "problem": {
+        "heading": "The Core Challenge",
+        "narrative": "A short story about the user pain points",
+        "bullets": ["Point 1", "Point 2", "Point 3"]
+      },
+      "solution": {
+        "heading": "The Strategic Approach",
+        "bullets": ["How we solved it 1", "How we solved it 2"]
+      },
+      "result": {
+        "heading": "The Impact",
+        "bullets": ["Success metric 1", "Success metric 2"]
+      },
+      "stats": [{"number": "e.g. 40%", "label": "e.g. Faster Loading"}],
+      "features": [{"icon": "Emoji", "title": "Feature Name", "desc": "One sentence description"}],
+      "process": {
+        "phase1": {"title": "e.g. Discovery & UX", "items": ["Task 1", "Task 2"]},
+        "phase2": {"title": "e.g. Visual Design", "items": ["Task 1", "Task 2"]},
+        "phase3": {"title": "e.g. Development", "items": ["Task 1", "Task 2"]}
+      },
+      "impact": [{"number": "e.g. 250k", "label": "e.g. Active Users"}],
+      "tech_badges": [{"name": "React", "color": "#61DAFB"}]
+    }
+    Ensure all fields are present and high-quality.
   `;
 
   try {

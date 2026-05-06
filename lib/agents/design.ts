@@ -28,23 +28,24 @@ export async function runDesignAgent(
 
   const prompt = `
     Analyze the visual language of the app "${appName}" (Category: ${category}) based on these screenshots.
+    Aim for high-end, editorial-grade design tokens.
     Return a JSON object with the following structure:
     {
       "primary_color": "#hex",
       "secondary_color": "#hex", 
       "accent_color": "#hex",
-      "bg_color": "#hex",
+      "bg_color": "#hex (use dark or neutral off-white for premium look)",
       "text_color": "#hex",
       "mood": "dark-luxury | minimal-clean | bold-playful | corporate-trust | vibrant-energetic",
       "font_pairing": {
-        "display": "Syne | Playfair Display | Cabinet Grotesk | Bebas Neue | Fraunces",
-        "body": "DM Sans | Lato | Source Serif | Nunito"
+        "display": "Syne | Cabinet Grotesk | Playfair Display | General Sans | Clash Display",
+        "body": "DM Sans | Inter | Satoshi | Instrument Sans"
       },
       "layout_style": "editorial | dashboard-heavy | story-narrative | feature-forward | minimal-impact",
       "section_order": ["hero", "problem", "features", "process", "stats", "result"],
       "hero_style": "fullbleed-mockup | split-layout | centered-minimal | asymmetric",
-      "mockup_count": 3,
-      "color_reasoning": "..."
+      "mockup_count": 5,
+      "color_reasoning": "Explain why these colors work for a premium case study."
     }
   `;
 
