@@ -6,7 +6,7 @@ export async function runHtmlAgent(
   model: ModelConfig,
   design: DesignOutput,
   copy: CopyOutput,
-  screenshots: string[]
+  screenshotCount: number
 ): Promise<string> {
   const client = getClient(model.provider);
 
@@ -40,9 +40,9 @@ export async function runHtmlAgent(
     ${JSON.stringify(copy, null, 2)}
 
     INSTRUCTIONS FOR SCREENSHOTS:
-    I have provided ${screenshots.length} screenshots. 
+    I have provided ${screenshotCount} screenshots. 
     Use the following exact strings as 'src' for your <img> tags where appropriate:
-    ${screenshots.map((_, i) => `PLACEHOLDER_SCREENSHOT_${i}`).join(', ')}
+    ${Array.from({ length: screenshotCount }).map((_, i) => `PLACEHOLDER_SCREENSHOT_${i}`).join(', ')}
 
     Return ONLY the raw HTML content starting with <!DOCTYPE html>.
   `;
@@ -62,12 +62,6 @@ export async function runHtmlAgent(
   } else if (html.includes('```')) {
     html = html.split('```')[1].split('```')[0].trim();
   }
-
-  // Post-process to replace placeholders with actual data URIs
-  screenshots.forEach((url, i) => {
-    const placeholder = new RegExp(`PLACEHOLDER_SCREENSHOT_${i}`, 'g');
-    html = html.replace(placeholder, url);
-  });
 
   return html;
 }

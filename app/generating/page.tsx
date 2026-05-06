@@ -66,14 +66,24 @@ export default function GeneratingPage() {
           body: JSON.stringify({
             design: designJson.data,
             copy: copyJson.data,
-            screenshots: formData?.screenshots,
+            screenshotCount: formData?.screenshots?.length || 0,
           }),
         });
         const htmlJson = await htmlRes.json();
         if (htmlJson.error) throw new Error(htmlJson.error);
         
-        setHtmlData(htmlJson.html);
+        let finalHtml = htmlJson.html;
         setModels(prev => ({ ...prev, 3: htmlJson.modelId }));
+
+        // Client-side placeholder replacement
+        if (formData?.screenshots) {
+          formData.screenshots.forEach((url, i) => {
+            const placeholder = `PLACEHOLDER_SCREENSHOT_${i}`;
+            finalHtml = finalHtml.split(placeholder).join(url);
+          });
+        }
+
+        setHtmlData(finalHtml);
 
         // Save to persistent storage
         const currentFormData = formData;

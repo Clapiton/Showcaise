@@ -8,13 +8,13 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log('--- API/BUILD-HTML: BODY PARSED ---');
-    const { design, copy, screenshots } = body;
+    const { design, copy, screenshotCount } = body;
     const availability = await buildAvailabilityMap();
     
     console.log('--- API/BUILD-HTML: RUNNING AGENT ---');
     const result = await runWithFallback(
       'html',
-      (model) => runHtmlAgent(model, design, copy, screenshots),
+      (model) => runHtmlAgent(model, design, copy, screenshotCount),
       availability
     );
     
