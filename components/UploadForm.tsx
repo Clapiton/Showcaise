@@ -15,6 +15,7 @@ export default function UploadForm() {
   const [description, setDescription] = useState(savedData?.description || '');
   const [category, setCategory] = useState(savedData?.category || 'Marketplace');
   const [platform, setPlatform] = useState(savedData?.platform || 'Mobile');
+  const [themePreference, setThemePreference] = useState(savedData?.themePreference || 'auto');
 
   // screenshots can be a mix of Files (new) and base64 strings (restored)
   const [screenshots, setScreenshots] = useState<(File | string)[]>(savedData?.screenshots || []);
@@ -83,6 +84,7 @@ export default function UploadForm() {
       category,
       platform,
       screenshots: base64Screenshots,
+      themePreference,
     });
 
     router.push('/generating');
@@ -124,6 +126,23 @@ export default function UploadForm() {
               {['Marketplace', 'Health', 'Finance', 'Social', 'Productivity', 'IoT', 'Education', 'Other'].map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400">Theme Preference</label>
+            <select
+              value={themePreference}
+              onChange={(e) => setThemePreference(e.target.value)}
+              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+            >
+              <option value="auto">✨ AI Automatic (Recommended)</option>
+              <option value="classic-modern">Classic Modern</option>
+              <option value="editorial">Editorial Dark</option>
+              <option value="magazine">Magazine Editorial</option>
+              <option value="minimal-clean">Minimal Clean</option>
+              <option value="vibrant-energetic">Vibrant Energetic</option>
+              <option value="bold-impact">Bold Impact</option>
             </select>
           </div>
         </div>
