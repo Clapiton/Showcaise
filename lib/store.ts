@@ -8,6 +8,7 @@ export interface FormData {
   category: string;
   platform: string;
   screenshots: string[];
+  themePreference?: string;
 }
 
 export interface Portfolio {
