@@ -25,6 +25,20 @@ export const MODEL_REGISTRY: Record<string, ModelConfig> = {
     supportsVision: false,
     priority: { design: 5, copy: 0.5, html: 3 },
   },
+  'gpt-5-turbo': {
+    id: 'gpt-5-turbo-2025-06-12',
+    provider: 'openai',
+    capabilities: ['design', 'copy', 'html'],
+    supportsVision: true,
+    priority: { design: 0.5, copy: 0.2, html: 0.5 },
+  },
+  'gpt-5.5': {
+    id: 'gpt-5.5-preview-2025-11-15',
+    provider: 'openai',
+    capabilities: ['design', 'copy', 'html'],
+    supportsVision: true,
+    priority: { design: -1, copy: -1, html: -1 }, // Top priority
+  },
   'deepseek-v4-pro': {
     id: 'deepseek-v4-pro',
     provider: 'deepseek',
