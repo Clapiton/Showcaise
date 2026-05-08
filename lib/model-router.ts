@@ -18,6 +18,13 @@ export const MODEL_REGISTRY: Record<string, ModelConfig> = {
     supportsVision: true,
     priority: { design: 0, copy: 0, html: 0 },
   },
+  'gpt-5-nano': {
+    id: 'gpt-5-nano-2025-08-07',
+    provider: 'openai',
+    capabilities: ['copy', 'html'],
+    supportsVision: false,
+    priority: { design: 5, copy: 0.5, html: 3 },
+  },
   'deepseek-v4-pro': {
     id: 'deepseek-v4-pro',
     provider: 'deepseek',

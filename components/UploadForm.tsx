@@ -194,6 +194,7 @@ export default function UploadForm() {
               className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
             >
               <option value="gpt-5">GPT-5 (Analytical)</option>
+              <option value="gpt-5-nano">GPT-5 Nano (Fastest)</option>
               <option value="deepseek-v4-pro">DeepSeek V4 Pro (Reasoning)</option>
               <option value="deepseek-v4-flash">DeepSeek V4 Flash (Fast)</option>
             </select>
