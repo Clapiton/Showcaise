@@ -4,6 +4,8 @@ export const magazine: Theme = {
     id: 'magazine',
     name: 'Magazine Editorial',
     signature: 'Asymmetric editorial layout, large chapter headings, pull quotes, serif elegance',
+    mockupStyle: 'scroll',
+    supportedPlatforms: ['Mobile', 'Desktop', 'Web'],
     sectionOrder: ['hero', 'stats', 'narrative', 'features', 'screens', 'process', 'result', 'tech'],
     requiredTokens: ['PRIMARY_COLOR', 'ACCENT_COLOR', 'BG_COLOR', 'DISPLAY_FONT', 'BODY_FONT'],
     scaffold: `<!DOCTYPE html>

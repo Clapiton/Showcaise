@@ -4,6 +4,8 @@ export const minimalClean: Theme = {
     id: 'minimal-clean',
     name: 'Minimal Clean',
     signature: 'Huge whitespace, single column, floating phone, obsessively clean typography',
+    mockupStyle: 'grid',
+    supportedPlatforms: ['Mobile', 'Desktop', 'Web'],
     sectionOrder: ['hero', 'screens', 'problem', 'solution', 'features', 'result', 'tech'],
     requiredTokens: ['PRIMARY_COLOR', 'BG_COLOR', 'DISPLAY_FONT', 'BODY_FONT'],
     scaffold: `<!DOCTYPE html>

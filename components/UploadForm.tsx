@@ -128,6 +128,18 @@ export default function UploadForm() {
               ))}
             </select>
           </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400">Platform</label>
+            <select
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+            >
+              <option value="Mobile">Mobile App</option>
+              <option value="Desktop">Desktop App</option>
+              <option value="Web">Web Application</option>
+            </select>
+          </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-400">Theme Preference</label>
@@ -179,10 +191,9 @@ export default function UploadForm() {
               onChange={(e) => setModelPrefs({ ...modelPrefs, design: e.target.value })}
               className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
             >
-              <option value="gpt-5.5">GPT-5.5 (Supreme Vision)</option>
-              <option value="gpt-5">GPT-5 (Standard)</option>
-              <option value="gpt-5-turbo">GPT-5 Turbo (Responsive)</option>
-              <option value="gpt-4o">GPT-4o (Legacy Pro)</option>
+              <option value="gpt-5.5">GPT-5.5 (gpt-5.5)</option>
+              <option value="gpt-5.4">GPT-5.4 (gpt-5.4)</option>
+              <option value="gpt-4o">GPT-4o (gpt-4o)</option>
             </select>
           </div>
 
@@ -195,13 +206,13 @@ export default function UploadForm() {
               onChange={(e) => setModelPrefs({ ...modelPrefs, copy: e.target.value })}
               className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
             >
-              <option value="gpt-5.5">GPT-5.5 (Supreme Creative)</option>
-              <option value="gpt-5">GPT-5 (Analytical)</option>
-              <option value="gpt-5-nano">GPT-5 Nano (Fastest)</option>
-              <option value="gpt-5-turbo">GPT-5 Turbo (Balanced)</option>
-              <option value="deepseek-v4-pro">DeepSeek V4 Pro (Reasoning)</option>
-              <option value="deepseek-v4-flash">DeepSeek V4 Flash (Fast)</option>
-              <option value="gpt-4o">GPT-4o (Standard)</option>
+              <option value="gpt-5.5">GPT-5.5 (gpt-5.5)</option>
+              <option value="gpt-5.4">GPT-5.4 (gpt-5.4)</option>
+              <option value="gpt-5-nano">GPT-5 Nano (gpt-5-nano)</option>
+              <option value="deepseek-v4-pro">DeepSeek V4 Pro (deepseek-v4-pro)</option>
+              <option value="deepseek-v4-flash">DeepSeek V4 Flash (deepseek-v4-flash)</option>
+              <option value="gpt-4o">GPT-4o (gpt-4o)</option>
+              <option value="gpt-4o-mini">GPT-4o Mini (gpt-4o-mini)</option>
             </select>
           </div>
 
@@ -214,12 +225,11 @@ export default function UploadForm() {
               onChange={(e) => setModelPrefs({ ...modelPrefs, html: e.target.value })}
               className="w-full bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
             >
-              <option value="gpt-5.5">GPT-5.5 (Master Architect)</option>
-              <option value="gpt-5">GPT-5 (Pro Design)</option>
-              <option value="gpt-5-turbo">GPT-5 Turbo (Advanced)</option>
-              <option value="deepseek-v4-pro">DeepSeek V4 Pro (Complex)</option>
-              <option value="gpt-4o">GPT-4o (Standard)</option>
-              <option value="gpt-4o-mini">GPT-4o Mini (Budget)</option>
+              <option value="gpt-5.5">GPT-5.5 (gpt-5.5)</option>
+              <option value="gpt-5.4">GPT-5.4 (gpt-5.4)</option>
+              <option value="deepseek-v4-pro">DeepSeek V4 Pro (deepseek-v4-pro)</option>
+              <option value="gpt-4o">GPT-4o (gpt-4o)</option>
+              <option value="gpt-4o-mini">GPT-4o Mini (gpt-4o-mini)</option>
             </select>
           </div>
         </div>

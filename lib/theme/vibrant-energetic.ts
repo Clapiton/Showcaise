@@ -4,6 +4,8 @@ export const vibrantEnergetic: Theme = {
     id: 'vibrant-energetic',
     name: 'Vibrant & Energetic',
     signature: 'Explosive colors, brutalist borders, bold type, energetic overlapping sections',
+    mockupStyle: 'fanned',
+    supportedPlatforms: ['Mobile', 'Desktop', 'Web'],
     sectionOrder: ['hero', 'stats', 'features', 'process', 'result', 'tech'],
     requiredTokens: ['PRIMARY_COLOR', 'ACCENT_COLOR', 'BG_COLOR', 'DISPLAY_FONT', 'BODY_FONT'],
     scaffold: `<!DOCTYPE html>

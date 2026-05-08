@@ -29,11 +29,12 @@ export async function runDesignAgent(
   const prompt = `
     Analyze the visual language of the app "${appName}" (Category: ${category}) based on these screenshots.
     Aim for high-end, editorial-grade design tokens.
+    IMPORTANT: Extract the exact primary and accent colors from the branding visible in the screenshots.
     Return a JSON object with the following structure:
     {
-      "primary_color": "#hex",
+      "primary_color": "#hex (extract from app branding)",
       "secondary_color": "#hex", 
-      "accent_color": "#hex",
+      "accent_color": "#hex (extract prominent brand color)",
       "bg_color": "#hex (use dark or neutral off-white for premium look)",
       "text_color": "#hex",
       "mood": "dark-luxury | minimal-clean | bold-playful | corporate-trust | vibrant-energetic",

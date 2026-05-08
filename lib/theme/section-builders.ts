@@ -6,14 +6,16 @@ export function buildAllSections(
     copy: CopyOutput,
     design: DesignOutput,
     screenshots: ScreenshotMetadata[],
-    theme: Theme
+    theme: Theme,
+    platform: string = 'Mobile'
 ) {
     const dashboardIndex = identifyDashboardIndex(screenshots);
-    const phoneCSS = generatePhoneCSS(screenshots.length);
-    const phoneFrames = buildPhoneFrames(screenshots, dashboardIndex);
+    const mockupHTML = buildMockup(screenshots, dashboardIndex, theme, platform);
+    const mockupCSS = generateMockupCSS(screenshots.length, theme, platform);
 
     return {
         APP_NAME: copy.hero_headline || 'Case Study',
+        // ... rest of tokens ...
         PROBLEM_HEADING: copy.problem?.heading || 'The Challenge',
         PROBLEM_PULLQUOTE: copy.problem?.bullets?.[0] || 'A significant hurdle in the user journey.',
         PROBLEM_BULLETS: buildBulletList(copy.problem?.bullets),
@@ -34,7 +36,8 @@ export function buildAllSections(
         TECH_BADGES: buildTechBadges(copy.tech_badges),
         
         SCREEN_SHOWCASES: buildScreenShowcases(screenshots),
-        PHONE_FRAMES: phoneFrames,
+        PHONE_FRAMES: mockupHTML, // Backward compatibility for some templates
+        MOCKUP_CONTENT: mockupHTML,
         
         PROCESS_COLUMNS: buildProcessColumns(copy.process),
         STATS_CELLS: buildStatsCells(copy.stats),
@@ -43,28 +46,141 @@ export function buildAllSections(
         
         DASHBOARD_SCREEN: `PLACEHOLDER_SCREENSHOT_${dashboardIndex}`,
         
-        PHONE_POSITIONS_CSS: phoneCSS,
-        PHONE_POSITIONS_CSS_INLINE: `<style>${phoneCSS}</style>`,
+        PHONE_POSITIONS_CSS: mockupCSS,
+        PHONE_POSITIONS_CSS_INLINE: `<style>${mockupCSS}</style>`,
         
         YEAR: new Date().getFullYear().toString(),
         LOGO_TEXT: copy.hero_headline?.split(' ')[0] || 'Showcaise',
     };
 }
 
+function buildMockup(screenshots: ScreenshotMetadata[], dashboardIndex: number, theme: Theme, platform: string) {
+    const total = Math.min(screenshots.length, 5);
+    const style = theme.mockupStyle;
+
+    const getClassName = (i: number, total: number) => {
+        const isDash = screenshots[i].index === dashboardIndex;
+        if (style === 'fanned') {
+            if (total === 1) return 'm-0';
+            if (total === 2) return isDash ? 'm-0' : 'm-1';
+            if (total === 3) return isDash ? 'm-1' : (i < 1 ? 'm-0' : 'm-2');
+            if (total >= 5) {
+                if (isDash) return 'm-c';
+                const others = screenshots.filter(s => s.index !== dashboardIndex);
+                if (screenshots[i].index === others[0].index) return 'm-l1';
+                if (screenshots[i].index === others[1].index) return 'm-l2';
+                if (screenshots[i].index === others[2].index) return 'm-r1';
+                return 'm-r2';
+            }
+        }
+        return `m-${i}`;
+    };
+
+    const frameClass = platform === 'Mobile' ? 'mobile-frame' : 'desktop-frame';
+
+    return screenshots.slice(0, 5).map((s, i) => `
+        <div class="mockup-item ${frameClass} ${getClassName(i, total)} ${s.index === dashboardIndex ? 'is-dashboard' : ''}">
+            <div class="frame-bezel">
+                <img src="PLACEHOLDER_SCREENSHOT_${s.index}" alt="App Screen ${s.index + 1}" />
+            </div>
+        </div>
+    `).join('\n');
+}
+
+function generateMockupCSS(count: number, theme: Theme, platform: string): string {
+    const style = theme.mockupStyle;
+    const isMobile = platform === 'Mobile';
+    const w = isMobile ? '200px' : '600px';
+    const h = isMobile ? '420px' : '380px';
+
+    if (style === 'grid') {
+        return `
+            .mockup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(${w}, 1fr)); gap: 2rem; }
+            .mockup-item { width: 100%; height: ${h}; position: relative; }
+        `;
+    }
+
+    if (style === 'scroll') {
+        return `
+            .mockup-scroll { display: flex; overflow-x: auto; gap: 2rem; padding: 2rem; scroll-snap-type: x mandatory; }
+            .mockup-item { flex: 0 0 ${w}; height: ${h}; scroll-snap-align: center; }
+        `;
+    }
+
+    // Default: Fanned
+    return `
+      .mockup-item { position: absolute; transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+      .mobile-frame { width: 200px; height: 400px; border-radius: 32px; }
+      .desktop-frame { width: 500px; height: 320px; border-radius: 12px; }
+      
+      .m-c { z-index: 10; left: 50%; transform: translateX(-50%); scale: 1.1; border-color: var(--accent); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+      .m-l1 { left: calc(50% - 160px); z-index: 5; transform: rotate(-5deg) translateY(20px); }
+      .m-l2 { left: calc(50% - 300px); z-index: 3; transform: rotate(-10deg) translateY(40px); opacity: 0.6; }
+      .m-r1 { left: calc(50% + 10px);  z-index: 5; transform: rotate(5deg) translateY(20px); }
+      .m-r2 { left: calc(50% + 150px); z-index: 3; transform: rotate(10deg) translateY(40px); opacity: 0.6; }
+      
+      .m-0 { left: 50%; transform: translateX(-50%); z-index: 10; }
+
+      @media (max-width: 768px) {
+        .mobile-frame { width: 140px; height: 280px; border-radius: 20px; }
+        .desktop-frame { width: 280px; height: 180px; }
+        .m-l1 { left: calc(50% - 100px); }
+        .m-l2 { left: calc(50% - 160px); }
+        .m-r1 { left: calc(50% + 10px); }
+        .m-r2 { left: calc(50% + 70px); }
+      }
+      @media (max-width: 480px) {
+        .mobile-frame { width: 120px; height: 240px; }
+        .m-l1 { left: calc(50% - 80px); }
+        .m-l2 { left: calc(50% - 130px); }
+        .m-r1 { left: calc(50% + 5px); }
+        .m-r2 { left: calc(50% + 55px); }
+      }
+    `;
+}
+
+function buildTimelineItems(copy: CopyOutput): string {
+  const items = [
+    { label: 'The Problem', heading: copy.problem?.heading || 'Challenge', bullets: copy.problem?.bullets || [], dot: '' },
+    { label: 'The Solution', heading: copy.solution?.heading || 'Solution', bullets: copy.solution?.bullets || [], dot: 'accent' },
+    { label: 'The Result', heading: copy.result?.heading || 'Result', bullets: copy.result?.bullets || [], dot: 'accent' },
+  ];
+  return items.map((item, i) => `
+    <div class="timeline-wrap">
+      <div class="timeline-line">
+        <div class="timeline-node">${i + 1}</div>
+        ${i < items.length - 1 ? '<div class="timeline-dash"></div>' : ''}
+      </div>
+      <div class="timeline-content">
+        <p class="timeline-eyebrow">${item.label}</p>
+        <h2 class="timeline-heading">${item.heading}</h2>
+        <ul class="timeline-bullets">
+          ${(item.bullets || []).map((b: string) => `
+            <li>
+              <div class="bullet-dot ${item.dot}"></div>
+              <p>${b}</p>
+            </li>`).join('')}
+        </ul>
+      </div>
+    </div>`
+  ).join('\n');
+}
+
+function buildTopbarTags(copy: CopyOutput, design: DesignOutput): string {
+    return [copy.category || 'Product', design.layout_style, design.mood]
+      .map((t: string) => `<span class="tag">${t}</span>`)
+      .join('');
+}
+
 function identifyDashboardIndex(screenshots: ScreenshotMetadata[]): number {
-    // 1. Explicitly marked
     const marked = screenshots.find(s => s.isDashboard);
     if (marked) return marked.index;
-
-    // 2. High confidence from vision analysis (if label exists)
     const analyzed = screenshots.find(s => 
         s.label?.toLowerCase().includes('dashboard') || 
         s.label?.toLowerCase().includes('home') ||
         s.label?.toLowerCase().includes('main')
     );
     if (analyzed) return analyzed.index;
-
-    // 3. Fallback to first
     return 0;
 }
 
@@ -156,101 +272,4 @@ function buildScreenShowcases(screenshots: ScreenshotMetadata[]) {
             </div>
         </div>
     `).join('\n');
-}
-
-function buildPhoneFrames(screenshots: ScreenshotMetadata[], dashboardIndex: number) {
-    const total = Math.min(screenshots.length, 5);
-    
-    const getClassName = (i: number, total: number) => {
-        // Find the index of the dashboard in the array to place it correctly
-        const isDash = screenshots[i].index === dashboardIndex;
-
-        if (total === 1) return 'phone-0';
-        if (total === 2) return isDash ? 'phone-0' : 'phone-1';
-        if (total === 3) {
-            if (isDash) return 'phone-1'; // Center
-            // Assign remaining positions
-            const remaining = screenshots.filter(s => s.index !== dashboardIndex);
-            if (screenshots[i].index === remaining[0].index) return 'phone-0';
-            return 'phone-2';
-        }
-        // ... similar logic for 4 and 5 ...
-        if (total === 5) {
-            if (isDash) return 'phone-c'; // Center
-            const remaining = screenshots.filter(s => s.index !== dashboardIndex);
-            if (screenshots[i].index === remaining[0].index) return 'phone-l1';
-            if (screenshots[i].index === remaining[1].index) return 'phone-l2';
-            if (screenshots[i].index === remaining[2].index) return 'phone-r1';
-            return 'phone-r2';
-        }
-        return `phone-${i}`;
-    };
-
-    return screenshots.slice(0, 5).map((s, i) => `
-        <div class="phone-frame ${getClassName(i, total)} ${s.index === dashboardIndex ? 'dashboard-frame' : ''}">
-            <img src="PLACEHOLDER_SCREENSHOT_${s.index}" alt="App Screen ${s.index + 1}" />
-        </div>
-    `).join('\n');
-}
-
-function generatePhoneCSS(count: number): string {
-  const configs: Record<number, string> = {
-    1: `
-      .phone-0 { width: 220px; height: 440px; left: 50%; transform: translateX(-50%); z-index: 5; }`,
-    2: `
-      .phone-0 { width: 200px; height: 400px; left: calc(50% - 110px); z-index: 4; transform: rotate(-4deg) translateY(20px); }
-      .phone-1 { width: 200px; height: 400px; left: calc(50% + 10px);  z-index: 4; transform: rotate(4deg) translateY(20px); }`,
-    3: `
-      .phone-0 { width: 175px; height: 360px; left: calc(50% - 170px); z-index: 4; transform: rotate(-4deg) translateY(20px); }
-      .phone-1 { width: 200px; height: 400px; left: 50%; transform: translateX(-50%); z-index: 5; border-color: var(--accent); }
-      .phone-2 { width: 175px; height: 360px; left: calc(50% + 0px);  z-index: 4; transform: rotate(4deg) translateY(20px); }`,
-    4: `
-      .phone-0 { width: 175px; height: 360px; left: calc(50% - 170px); z-index: 4; transform: rotate(-4deg) translateY(20px); }
-      .phone-1 { width: 155px; height: 320px; left: calc(50% - 320px); z-index: 3; transform: rotate(-8deg) translateY(40px); opacity: 0.7; }
-      .phone-2 { width: 200px; height: 400px; left: 50%; transform: translateX(-50%); z-index: 5; border-color: var(--accent); }
-      .phone-3 { width: 175px; height: 360px; left: calc(50% + 0px);  z-index: 4; transform: rotate(4deg) translateY(20px); }`,
-    5: `
-      .phone-c { width: 200px; height: 400px; left: 50%; transform: translateX(-50%); z-index: 5; border-color: var(--accent); }
-      .phone-l1 { width: 175px; height: 360px; left: calc(50% - 170px); z-index: 4; transform: rotate(-4deg) translateY(20px); }
-      .phone-l2 { width: 155px; height: 320px; left: calc(50% - 320px); z-index: 3; transform: rotate(-8deg) translateY(40px); opacity: 0.7; }
-      .phone-r1 { width: 175px; height: 360px; left: calc(50% + 0px);  z-index: 4; transform: rotate(4deg) translateY(20px); }
-      .phone-r2 { width: 155px; height: 320px; left: calc(50% + 155px); z-index: 3; transform: rotate(8deg) translateY(40px); opacity: 0.7; }
-    `,
-  };
-
-  if (count >= 5) return configs[5];
-  return configs[Math.min(count, 5)] || configs[5];
-}
-
-function buildTimelineItems(copy: CopyOutput): string {
-  const items = [
-    { label: 'The Problem', heading: copy.problem?.heading || 'Challenge', bullets: copy.problem?.bullets || [], dot: '' },
-    { label: 'The Solution', heading: copy.solution?.heading || 'Solution', bullets: copy.solution?.bullets || [], dot: 'accent' },
-    { label: 'The Result', heading: copy.result?.heading || 'Result', bullets: copy.result?.bullets || [], dot: 'accent' },
-  ];
-  return items.map((item, i) => `
-    <div class="timeline-wrap">
-      <div class="timeline-line">
-        <div class="timeline-node">${i + 1}</div>
-        ${i < items.length - 1 ? '<div class="timeline-dash"></div>' : ''}
-      </div>
-      <div class="timeline-content">
-        <p class="timeline-eyebrow">${item.label}</p>
-        <h2 class="timeline-heading">${item.heading}</h2>
-        <ul class="timeline-bullets">
-          ${(item.bullets || []).map((b: string) => `
-            <li>
-              <div class="bullet-dot ${item.dot}"></div>
-              <p>${b}</p>
-            </li>`).join('')}
-        </ul>
-      </div>
-    </div>`
-  ).join('\n');
-}
-
-function buildTopbarTags(copy: CopyOutput, design: DesignOutput): string {
-    return [copy.category || 'Product', design.layout_style, design.mood]
-      .map((t: string) => `<span class="tag">${t}</span>`)
-      .join('');
 }

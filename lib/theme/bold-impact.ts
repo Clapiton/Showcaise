@@ -4,6 +4,8 @@ export const boldImpact: Theme = {
     id: 'bold-impact',
     name: 'Bold Impact',
     signature: 'Split hero, large stat numbers up front, bento feature grid, accent dividers',
+    mockupStyle: 'grid',
+    supportedPlatforms: ['Mobile', 'Desktop', 'Web'],
     sectionOrder: ['hero', 'stats', 'problem', 'features', 'process', 'result', 'tech'],
     requiredTokens: ['PRIMARY_COLOR', 'ACCENT_COLOR', 'BG_COLOR', 'DISPLAY_FONT', 'BODY_FONT'],
     scaffold: `<!DOCTYPE html>

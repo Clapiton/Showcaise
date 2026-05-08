@@ -4,17 +4,18 @@ import { runWithFallback } from '@/lib/agent-runner';
 import { runHtmlAgent, streamHtmlAgent } from '@/lib/agents/html';
 
 export const runtime = 'edge';
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   console.log('--- API/BUILD-HTML: START ---');
   try {
-    const { design, copy, screenshotCount, modelPreference } = await req.json();
-    console.log('--- API/BUILD-HTML: BODY PARSED ---');
+    const { design, copy, screenshotCount, modelPreference, themePreference, platform } = await req.json();
+    console.log('--- API/BUILD-HTML: BODY PARSED ---', { themePreference, platform });
     const availability = await buildAvailabilityMap();
-
+    
     // Dynamically pick the model based on preference
     const model = pickModel('html', availability, false, modelPreference);
-    const stream = await streamHtmlAgent(model, design, copy, screenshotCount);
+    const stream = await streamHtmlAgent(model, design, copy, screenshotCount, themePreference, platform);
 
     const encoder = new TextEncoder();
     const customStream = new ReadableStream({

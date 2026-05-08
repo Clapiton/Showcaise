@@ -9,6 +9,10 @@ export interface Theme {
     sectionOrder: string[];
     // Unique layout features of this theme
     signature: string;
+    // Default mockup arrangement (fanned, grid, single, scroll)
+    mockupStyle: 'fanned' | 'grid' | 'single' | 'scroll';
+    // Which platforms this theme supports well
+    supportedPlatforms: ('Mobile' | 'Desktop' | 'Web')[];
 }
 
 export interface ScreenshotMetadata {

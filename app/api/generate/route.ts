@@ -4,6 +4,7 @@ import { runWithFallback } from '@/lib/agent-runner';
 import { runCopyAgent } from '@/lib/agents/copy';
 
 export const runtime = 'edge';
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {

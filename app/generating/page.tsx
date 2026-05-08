@@ -108,6 +108,8 @@ export default function GeneratingPage() {
             copy: copyJson.data,
             screenshotCount: formData?.screenshots?.length || 0,
             modelPreference: modelPrefs.html,
+            themePreference: formData?.themePreference,
+            platform: formData?.platform,
           }),
         });
 
@@ -180,12 +182,28 @@ export default function GeneratingPage() {
     runPipeline();
   }, [formData]);
 
-  const steps = [
-    { id: 0, label: 'Initializing Pipeline', icon: Zap },
-    { id: 1, label: 'Analyzing App Design', icon: Palette },
-    { id: 2, label: 'Writing Case Study', icon: FileText },
-    { id: 3, label: 'Building HTML Page', icon: Code },
-  ];
+  const steps = useMemo(() => {
+    const isReasoning = (pref: string) => pref.includes('pro') || pref.includes('5.5');
+    
+    return [
+      { id: 0, label: 'Initializing Pipeline', icon: Zap },
+      { 
+        id: 1, 
+        label: isReasoning(modelPrefs.design) ? 'AI is deep-thinking (Design)...' : 'Analyzing App Design', 
+        icon: Palette 
+      },
+      { 
+        id: 2, 
+        label: isReasoning(modelPrefs.copy) ? 'AI is deep-thinking (Copy)...' : 'Writing Case Study', 
+        icon: FileText 
+      },
+      { 
+        id: 3, 
+        label: isReasoning(modelPrefs.html) ? 'AI is deep-thinking (HTML)...' : 'Building HTML Page', 
+        icon: Code 
+      },
+    ];
+  }, [modelPrefs]);
 
   if (error) {
     return (

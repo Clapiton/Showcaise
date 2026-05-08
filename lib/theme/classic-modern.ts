@@ -4,6 +4,8 @@ export const classicModern: Theme = {
     id: 'classic-modern',
     name: 'Classic Modern',
     signature: 'High-fidelity showcase with floating mockups, timeline-driven story, and clean stats.',
+    mockupStyle: 'fanned',
+    supportedPlatforms: ['Mobile', 'Desktop', 'Web'],
     sectionOrder: ['hero', 'stats', 'process', 'timeline', 'features', 'impact', 'tech'],
     requiredTokens: ['PRIMARY_COLOR', 'ACCENT_COLOR', 'BG_COLOR', 'DISPLAY_FONT', 'BODY_FONT'],
     scaffold: `<!DOCTYPE html>
@@ -36,8 +38,11 @@ export const classicModern: Theme = {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 60px;
+  padding: 24px clamp(20px, 5vw, 60px);
   border-bottom: 1px solid var(--border);
+}
+@media (max-width: 768px) {
+  .topbar { flex-direction: column; gap: 16px; text-align: center; }
 }
 .topbar-logo {
   font-family: var(--font-display);

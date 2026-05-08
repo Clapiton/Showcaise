@@ -31,7 +31,12 @@ const MOOD_TO_THEME: Record<string, string> = {
     'classic-modern': 'classic-modern',
 };
 
-export function pickTheme(design: DesignOutput): Theme {
+export function pickTheme(design: DesignOutput, overrideId?: string): Theme {
+    if (overrideId && overrideId !== 'ai-automatic') {
+        const found = THEME_REGISTRY.find(t => t.id === overrideId);
+        if (found) return found;
+    }
+
     const themeId = MOOD_TO_THEME[design.mood]
         ?? MOOD_TO_THEME[design.layout_style]
         ?? 'editorial'; // safe default

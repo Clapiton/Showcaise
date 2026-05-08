@@ -11,61 +11,54 @@ export interface ModelConfig {
 }
 
 export const MODEL_REGISTRY: Record<string, ModelConfig> = {
-  'gpt-5': {
-    id: 'gpt-5',
-    provider: 'openai',
-    capabilities: ['design', 'copy', 'html'],
-    supportsVision: true,
-    priority: { design: 0, copy: 0, html: 0 },
-  },
-  'gpt-5-nano': {
-    id: 'gpt-5-nano-2025-08-07',
-    provider: 'openai',
-    capabilities: ['copy', 'html'],
-    supportsVision: false,
-    priority: { design: 5, copy: 0.5, html: 3 },
-  },
-  'gpt-5-turbo': {
-    id: 'gpt-5-turbo-2025-06-12',
-    provider: 'openai',
-    capabilities: ['design', 'copy', 'html'],
-    supportsVision: true,
-    priority: { design: 0.5, copy: 0.2, html: 0.5 },
-  },
   'gpt-5.5': {
-    id: 'gpt-5.5-preview-2025-11-15',
+    id: 'gpt-5.5',
     provider: 'openai',
     capabilities: ['design', 'copy', 'html'],
     supportsVision: true,
-    priority: { design: -1, copy: -1, html: -1 }, // Top priority
+    priority: { design: -1, copy: -1, html: -1 },
   },
-  'deepseek-v4-pro': {
-    id: 'deepseek-v4-pro',
-    provider: 'deepseek',
-    capabilities: ['copy', 'html'],
-    supportsVision: false,
-    priority: { design: 3, copy: 1, html: 1 },
-  },
-  'deepseek-v4-flash': {
-    id: 'deepseek-v4-flash',
-    provider: 'deepseek',
-    capabilities: ['copy', 'html'],
-    supportsVision: false,
-    priority: { design: 4, copy: 2, html: 2 },
+  'gpt-5.4': {
+    id: 'gpt-5.4',
+    provider: 'openai',
+    capabilities: ['design', 'copy', 'html'],
+    supportsVision: true,
+    priority: { design: 0, copy: 0.1, html: 0.1 },
   },
   'gpt-4o': {
     id: 'gpt-4o',
     provider: 'openai',
     capabilities: ['design', 'copy', 'html'],
     supportsVision: true,
-    priority: { design: 1, copy: 3, html: 4 },
+    priority: { design: 1, copy: 2, html: 3 },
   },
   'gpt-4o-mini': {
     id: 'gpt-4o-mini',
     provider: 'openai',
     capabilities: ['copy', 'html'],
     supportsVision: true,
-    priority: { design: 2, copy: 4, html: 5 },
+    priority: { design: 2, copy: 3, html: 4 },
+  },
+  'gpt-5-nano': {
+    id: 'gpt-5-nano',
+    provider: 'openai',
+    capabilities: ['copy', 'html'],
+    supportsVision: false,
+    priority: { design: 5, copy: 0.5, html: 2 },
+  },
+  'deepseek-v4-pro': {
+    id: 'deepseek-v4-pro',
+    provider: 'deepseek',
+    capabilities: ['copy', 'html'],
+    supportsVision: false,
+    priority: { design: 3, copy: 0, html: 0 },
+  },
+  'deepseek-v4-flash': {
+    id: 'deepseek-v4-flash',
+    provider: 'deepseek',
+    capabilities: ['copy', 'html'],
+    supportsVision: false,
+    priority: { design: 4, copy: 1, html: 1 },
   },
 };
 

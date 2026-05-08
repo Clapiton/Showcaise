@@ -12,19 +12,21 @@ export async function runHtmlAgent(
   model: ModelConfig,
   design: DesignOutput,
   copy: CopyOutput,
-  screenshots: ScreenshotMetadata[] | number
+  screenshots: ScreenshotMetadata[] | number,
+  themePreference?: string,
+  platform?: string
 ): Promise<string> {
   const screenshotData = Array.isArray(screenshots)
     ? screenshots
     : Array.from({ length: screenshots }, (_, i) => ({ index: i, isDashboard: i === 0 }));
 
-  // 1. Pick theme based on mood
-  const theme = pickTheme(design);
-  console.log(`[HTML AGENT] Theme selected: ${theme.name} for mood: ${design.mood}`);
+  // 1. Pick theme based on mood or override
+  const theme = pickTheme(design, themePreference);
+  console.log(`[HTML AGENT] Theme selected: ${theme.name} (ID: ${theme.id}) for mood: ${design.mood}`);
 
   // 2. Build all tokens
   const tokens = buildDesignTokens(design);
-  const sections = buildAllSections(copy, design, screenshotData, theme);
+  const sections = buildAllSections(copy, design, screenshotData, theme, platform);
 
   // 3. Fill scaffold
   let html = theme.scaffold;
@@ -45,16 +47,18 @@ export async function streamHtmlAgent(
   model: ModelConfig,
   design: DesignOutput,
   copy: CopyOutput,
-  screenshots: ScreenshotMetadata[] | number
+  screenshots: ScreenshotMetadata[] | number,
+  themePreference?: string,
+  platform?: string
 ) {
   const screenshotData = Array.isArray(screenshots)
     ? screenshots
     : Array.from({ length: screenshots }, (_, i) => ({ index: i, isDashboard: i === 0 }));
 
   const client = getClient(model.provider);
-  const theme = pickTheme(design);
+  const theme = pickTheme(design, themePreference);
   const tokens = buildDesignTokens(design);
-  const sections = buildAllSections(copy, design, screenshotData, theme);
+  const sections = buildAllSections(copy, design, screenshotData, theme, platform);
 
   const prompt = `
     Generate ONLY the inner hero HTML for a ${design.mood} app case study.

@@ -4,6 +4,8 @@ export const editorial: Theme = {
     id: 'editorial',
     name: 'Editorial Dark',
     signature: 'Luxury dark mode, fanned mockups, numbered timeline, elegant feature grids',
+    mockupStyle: 'fanned',
+    supportedPlatforms: ['Mobile', 'Desktop', 'Web'],
     sectionOrder: ['hero', 'stats', 'process', 'timeline', 'features', 'impact', 'tech'],
     requiredTokens: ['PRIMARY_COLOR', 'ACCENT_COLOR', 'BG_COLOR', 'DISPLAY_FONT', 'BODY_FONT'],
     scaffold: `<!DOCTYPE html>
