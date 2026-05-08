@@ -8,174 +8,174 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GeneratingPage() {
   const router = useRouter();
-    const { formData, designData, copyData, modelPrefs, setDesignData, setCopyData, setHtmlData } = useStore();
-    
-    const [step, setStep] = useState(0);
-    const [error, setError] = useState<string | null>(null);
-    const [models, setModels] = useState<Record<number, string>>({
-      1: 'GPT-5',
-      2: 'GPT-5',
-      3: 'GPT-5'
-    });
-  
-    useEffect(() => {
-      if (!formData) {
-        router.push('/');
-        return;
-      }
-  
-      async function runPipeline() {
-        try {
-          // Step 1: Analyze Design
-          setStep(1);
-          const designRes = await fetch('/api/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              appName: formData?.appName,
-              category: formData?.category,
-              screenshots: formData?.screenshots,
-              modelPreference: modelPrefs.design,
-            }),
-          });
-  
-          if (!designRes.ok) {
-            const text = await designRes.text();
-            throw new Error(`Design analysis failed (${designRes.status}): ${text.slice(0, 100)}`);
-          }
+  const { formData, designData, copyData, modelPrefs, setDesignData, setCopyData, setHtmlData } = useStore();
 
-          // Read stream for analyze (has keep-alive spaces)
-          const designReader = designRes.body?.getReader();
-          const designDecoder = new TextDecoder();
-          let designRaw = '';
-          if (designReader) {
-            while (true) {
-              const { done, value } = await designReader.read();
-              if (done) break;
-              designRaw += designDecoder.decode(value, { stream: true });
-            }
-          }
-          
-          const cleanedDesignRaw = designRaw.trim();
-          if (!cleanedDesignRaw) throw new Error("Design analysis returned empty response");
-          
-          let designJson;
-          try {
-            designJson = JSON.parse(cleanedDesignRaw);
-          } catch (e) {
-            console.error('Failed to parse design JSON:', cleanedDesignRaw);
-            throw new Error("Failed to parse design data from AI");
-          }
+  const [step, setStep] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [models, setModels] = useState<Record<number, string>>({
+    1: 'GPT-5',
+    2: 'GPT-5',
+    3: 'GPT-5'
+  });
 
-          if (designJson.error) throw new Error(designJson.error);
-          
-          setDesignData(designJson.data);
-          setModels(prev => ({ ...prev, 1: designJson.modelId }));
-  
-          // Step 2: Write Copy
-          setStep(2);
-          const copyRes = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              appName: formData?.appName,
-              tagline: formData?.tagline,
-              description: formData?.description,
-              design: designJson.data,
-              modelPreference: modelPrefs.copy,
-            }),
-          });
+  useEffect(() => {
+    if (!formData) {
+      router.push('/');
+      return;
+    }
 
-          if (!copyRes.ok) {
-            const text = await copyRes.text();
-            if (copyRes.status === 504) throw new Error("Copy generation timed out. Try using a faster model.");
-            throw new Error(`Copy generation failed (${copyRes.status}): ${text.slice(0, 100)}`);
-          }
+    async function runPipeline() {
+      try {
+        // Step 1: Analyze Design
+        setStep(1);
+        const designRes = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            appName: formData?.appName,
+            category: formData?.category,
+            screenshots: formData?.screenshots,
+            modelPreference: modelPrefs.design,
+          }),
+        });
 
-          const copyJson = await copyRes.json();
-          if (copyJson.error) throw new Error(copyJson.error);
-          
-          setCopyData(copyJson.data);
-          setModels(prev => ({ ...prev, 2: copyJson.modelId }));
-  
-          // Step 3: Build HTML (Streaming)
-          setStep(3);
-          const htmlRes = await fetch('/api/build-html', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              design: designJson.data,
-              copy: copyJson.data,
-              screenshotCount: formData?.screenshots?.length || 0,
-              modelPreference: modelPrefs.html,
-            }),
-          });
- 
-          if (!htmlRes.ok) {
-            const text = await htmlRes.text();
-            throw new Error(`HTML build failed (${htmlRes.status}): ${text.slice(0, 100)}`);
-          }
-        
-          const modelId = htmlRes.headers.get('X-Model-Id') || 'unknown';
-          setModels(prev => ({ ...prev, 3: modelId }));
-  
-          // Read the stream
-          const reader = htmlRes.body?.getReader();
-          const decoder = new TextDecoder();
-          let streamedHtml = '';
-  
-          if (reader) {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              const chunk = decoder.decode(value, { stream: true });
-              streamedHtml += chunk;
-              // Clean up markdown markers if the model included them despite instructions
-              const cleanedChunk = streamedHtml.replace(/```html?|```/g, '');
-              setHtmlData(cleanedChunk); // Update UI in real-time
-            }
-          }
-          
-          let finalHtml = streamedHtml.replace(/```html?|```/g, '').trim();
-  
-          // Client-side placeholder replacement
-          if (formData?.screenshots) {
-            formData.screenshots.forEach((url, i) => {
-              const placeholder = `PLACEHOLDER_SCREENSHOT_${i}`;
-              finalHtml = finalHtml.split(placeholder).join(url);
-            });
-          }
-  
-          setHtmlData(finalHtml);
-  
-          // Save to persistent storage
-          const currentFormData = formData;
-          if (currentFormData) {
-            const addPortfolio = useStore.getState().addPortfolio;
-            addPortfolio({
-              id: Date.now().toString(),
-              name: currentFormData.appName,
-              category: currentFormData.category,
-              date: new Date().toLocaleDateString('en-US', { 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-              }),
-              htmlData: finalHtml,
-              formData: currentFormData
-            });
-          }
-  
-          setStep(4);
-          setTimeout(() => {
-            router.push('/preview/result');
-          }, 2000);
-  
-        } catch (err: any) {
-          console.error('Pipeline error:', err);
-          setError(err.message || 'An unexpected error occurred in the generation pipeline.');
+        if (!designRes.ok) {
+          const text = await designRes.text();
+          throw new Error(`Design analysis failed (${designRes.status}): ${text.slice(0, 100)}`);
         }
+
+        // Read stream for analyze (has keep-alive spaces)
+        const designReader = designRes.body?.getReader();
+        const designDecoder = new TextDecoder();
+        let designRaw = '';
+        if (designReader) {
+          while (true) {
+            const { done, value } = await designReader.read();
+            if (done) break;
+            designRaw += designDecoder.decode(value, { stream: true });
+          }
+        }
+
+        const cleanedDesignRaw = designRaw.trim();
+        if (!cleanedDesignRaw) throw new Error("Design analysis returned empty response");
+
+        let designJson;
+        try {
+          designJson = JSON.parse(cleanedDesignRaw);
+        } catch (e) {
+          console.error('Failed to parse design JSON:', cleanedDesignRaw);
+          throw new Error("Failed to parse design data from AI");
+        }
+
+        if (designJson.error) throw new Error(designJson.error);
+
+        setDesignData(designJson.data);
+        setModels(prev => ({ ...prev, 1: designJson.modelId }));
+
+        // Step 2: Write Copy
+        setStep(2);
+        const copyRes = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            appName: formData?.appName,
+            tagline: formData?.tagline,
+            description: formData?.description,
+            design: designJson.data,
+            modelPreference: modelPrefs.copy,
+          }),
+        });
+
+        if (!copyRes.ok) {
+          const text = await copyRes.text();
+          if (copyRes.status === 504) throw new Error("Copy generation timed out. Try using a faster model.");
+          throw new Error(`Copy generation failed (${copyRes.status}): ${text.slice(0, 100)}`);
+        }
+
+        const copyJson = await copyRes.json();
+        if (copyJson.error) throw new Error(copyJson.error);
+
+        setCopyData(copyJson.data);
+        setModels(prev => ({ ...prev, 2: copyJson.modelId }));
+
+        // Step 3: Build HTML (Streaming)
+        setStep(3);
+        const htmlRes = await fetch('/api/build-html', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            design: designJson.data,
+            copy: copyJson.data,
+            screenshotCount: formData?.screenshots?.length || 0,
+            modelPreference: modelPrefs.html,
+          }),
+        });
+
+        if (!htmlRes.ok) {
+          const text = await htmlRes.text();
+          throw new Error(`HTML build failed (${htmlRes.status}): ${text.slice(0, 100)}`);
+        }
+
+        const modelId = htmlRes.headers.get('X-Model-Id') || 'unknown';
+        setModels(prev => ({ ...prev, 3: modelId }));
+
+        // Read the stream
+        const reader = htmlRes.body?.getReader();
+        const decoder = new TextDecoder();
+        let streamedHtml = '';
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            streamedHtml += chunk;
+            // Clean up markdown markers if the model included them despite instructions
+            const cleanedChunk = streamedHtml.replace(/```html?|```/g, '');
+            setHtmlData(cleanedChunk); // Update UI in real-time
+          }
+        }
+
+        let finalHtml = streamedHtml.replace(/```html?|```/g, '').trim();
+
+        // Client-side placeholder replacement
+        if (formData?.screenshots) {
+          formData.screenshots.forEach((url, i) => {
+            const placeholder = `PLACEHOLDER_SCREENSHOT_${i}`;
+            finalHtml = finalHtml.split(placeholder).join(url);
+          });
+        }
+
+        setHtmlData(finalHtml);
+
+        // Save to persistent storage
+        const currentFormData = formData;
+        if (currentFormData) {
+          const addPortfolio = useStore.getState().addPortfolio;
+          addPortfolio({
+            id: Date.now().toString(),
+            name: currentFormData.appName,
+            category: currentFormData.category,
+            date: new Date().toLocaleDateString('en-US', {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+            }),
+            htmlData: finalHtml,
+            formData: currentFormData
+          });
+        }
+
+        setStep(4);
+        setTimeout(() => {
+          router.push('/preview/result');
+        }, 2000);
+
+      } catch (err: any) {
+        console.error('Pipeline error:', err);
+        setError(err.message || 'An unexpected error occurred in the generation pipeline.');
       }
+    }
 
     runPipeline();
   }, [formData]);
@@ -215,11 +215,11 @@ export default function GeneratingPage() {
   return (
     <div className="min-h-screen bg-black text-white p-6 md:p-12 lg:p-20 flex flex-col lg:flex-row gap-12 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#10b98110,transparent_50%)] pointer-events-none" />
-      
+
       {/* Left Column: Progress Steps */}
       <div className="flex-1 space-y-12 relative z-10">
         <div className="space-y-4">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl font-black tracking-tight"
@@ -235,17 +235,16 @@ export default function GeneratingPage() {
             const isDone = step > i;
             const isCurrent = step === i;
             const modelName = models[s.id as keyof typeof models];
-            
+
             return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className={`flex items-center gap-4 p-6 rounded-2xl border transition-all duration-500 ${
-                  isCurrent ? 'bg-emerald-500/5 border-emerald-500/20 scale-[1.02] shadow-[0_0_40px_rgba(16,185,129,0.1)]' : 
-                  isDone ? 'bg-slate-900/30 border-slate-800/50 opacity-60' : 'bg-transparent border-transparent opacity-30'
-                }`}
+                className={`flex items-center gap-4 p-6 rounded-2xl border transition-all duration-500 ${isCurrent ? 'bg-emerald-500/5 border-emerald-500/20 scale-[1.02] shadow-[0_0_40px_rgba(16,185,129,0.1)]' :
+                    isDone ? 'bg-slate-900/30 border-slate-800/50 opacity-60' : 'bg-transparent border-transparent opacity-30'
+                  }`}
               >
                 <div className={`p-3 rounded-xl ${isDone ? 'bg-emerald-500 text-black' : isCurrent ? 'bg-emerald-500/20 text-emerald-500' : 'bg-slate-800 text-slate-500'}`}>
                   {isDone ? <Check className="w-6 h-6" /> : isCurrent ? <Loader2 className="w-6 h-6 animate-spin" /> : <Icon className="w-6 h-6" />}
@@ -254,7 +253,7 @@ export default function GeneratingPage() {
                   <p className={`font-bold text-lg ${isCurrent ? 'text-white' : 'text-slate-400'}`}>{s.label}</p>
                   <AnimatePresence mode="wait">
                     {modelName && (isCurrent || isDone) && (
-                      <motion.p 
+                      <motion.p
                         key={modelName}
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -273,7 +272,7 @@ export default function GeneratingPage() {
 
       {/* Right Column: Visual Canvas */}
       <div className="flex-[1.2] min-h-[500px] relative">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="sticky top-20 w-full aspect-[4/5] bg-slate-900/50 rounded-[32px] border border-slate-800 overflow-hidden shadow-2xl flex flex-col"
@@ -294,13 +293,13 @@ export default function GeneratingPage() {
           </div>
 
           {/* Canvas Content */}
-          <div className="flex-1 p-8 relative overflow-hidden transition-colors duration-1000" style={{ 
+          <div className="flex-1 p-8 relative overflow-hidden transition-colors duration-1000" style={{
             backgroundColor: designData?.bg_color || '#0a0a0a',
             fontFamily: designData?.font_pairing?.body || 'inherit'
           }}>
             <AnimatePresence>
               {!designData && (
-                <motion.div 
+                <motion.div
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 flex flex-col items-center justify-center text-slate-700"
                 >
@@ -311,7 +310,7 @@ export default function GeneratingPage() {
             </AnimatePresence>
 
             {designData && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="space-y-8 h-full"
@@ -319,8 +318,8 @@ export default function GeneratingPage() {
                 {/* Hero Shell */}
                 <div className="space-y-4">
                   <div className="flex gap-2">
-                    <div className="px-3 py-1 rounded-full text-[10px] font-bold" style={{ 
-                      backgroundColor: `${designData.primary_color}20`, 
+                    <div className="px-3 py-1 rounded-full text-[10px] font-bold" style={{
+                      backgroundColor: `${designData.primary_color}20`,
                       color: designData.primary_color,
                       borderColor: `${designData.primary_color}40`,
                       borderWidth: 1
@@ -331,14 +330,14 @@ export default function GeneratingPage() {
                       {designData.mood}
                     </div>
                   </div>
-                  
-                  <h1 className="text-3xl font-black leading-tight" style={{ 
+
+                  <h1 className="text-3xl font-black leading-tight" style={{
                     color: designData.text_color,
                     fontFamily: designData.font_pairing?.display
                   }}>
                     {copyData?.hero_headline || formData?.appName || 'Generating Title...'}
                   </h1>
-                  
+
                   <p className="text-sm opacity-60 leading-relaxed max-w-[80%]" style={{ color: designData.text_color }}>
                     {copyData?.hero_subheadline || formData?.tagline || 'Crafting the perfect narrative for your product...'}
                   </p>
@@ -347,9 +346,9 @@ export default function GeneratingPage() {
                 {/* Mockup Shell */}
                 <div className="relative aspect-video rounded-2xl border border-white/10 bg-white/5 overflow-hidden shadow-xl">
                   {formData?.screenshots?.[0] ? (
-                    <img 
-                      src={formData.screenshots[0]} 
-                      className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-700" 
+                    <img
+                      src={formData.screenshots[0]}
+                      className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-700"
                       alt="preview"
                     />
                   ) : (
@@ -359,7 +358,7 @@ export default function GeneratingPage() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4 h-1 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div 
+                    <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: '100%' }}
                       transition={{ duration: 15, repeat: Infinity }}
@@ -382,7 +381,7 @@ export default function GeneratingPage() {
             )}
 
             {/* Grid Overlay */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ 
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{
               backgroundImage: `radial-gradient(circle at 1px 1px, ${designData?.text_color || 'white'} 1px, transparent 0)`,
               backgroundSize: '24px 24px'
             }} />

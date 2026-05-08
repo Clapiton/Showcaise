@@ -11,11 +11,11 @@ export async function POST(req: Request) {
     const { design, copy, screenshotCount, modelPreference } = await req.json();
     console.log('--- API/BUILD-HTML: BODY PARSED ---');
     const availability = await buildAvailabilityMap();
-    
+
     // Dynamically pick the model based on preference
     const model = pickModel('html', availability, false, modelPreference);
     const stream = await streamHtmlAgent(model, design, copy, screenshotCount);
-    
+
     const encoder = new TextEncoder();
     const customStream = new ReadableStream({
       async start(controller) {

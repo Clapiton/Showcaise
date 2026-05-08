@@ -14,8 +14,8 @@ export async function runHtmlAgent(
   copy: CopyOutput,
   screenshots: ScreenshotMetadata[] | number
 ): Promise<string> {
-  const screenshotData = Array.isArray(screenshots) 
-    ? screenshots 
+  const screenshotData = Array.isArray(screenshots)
+    ? screenshots
     : Array.from({ length: screenshots }, (_, i) => ({ index: i, isDashboard: i === 0 }));
 
   // 1. Pick theme based on mood
@@ -29,7 +29,7 @@ export async function runHtmlAgent(
   // 3. Fill scaffold
   let html = theme.scaffold;
   const allTokens = { BASE_CSS, ...tokens, ...sections };
-  
+
   for (const [key, val] of Object.entries(allTokens)) {
     html = html.replaceAll(`{{${key}}}`, String(val));
   }
@@ -47,8 +47,8 @@ export async function streamHtmlAgent(
   copy: CopyOutput,
   screenshots: ScreenshotMetadata[] | number
 ) {
-  const screenshotData = Array.isArray(screenshots) 
-    ? screenshots 
+  const screenshotData = Array.isArray(screenshots)
+    ? screenshots
     : Array.from({ length: screenshots }, (_, i) => ({ index: i, isDashboard: i === 0 }));
 
   const client = getClient(model.provider);
@@ -79,11 +79,11 @@ export async function streamHtmlAgent(
 
   return (async function* () {
     let heroHtml = '';
-    
+
     const parts = theme.scaffold.split('{{HERO_CONTENT}}');
     const preHero = parts[0];
     const postHero = parts[1];
-    
+
     let preHtml = preHero;
     const allTokens = { BASE_CSS, ...tokens, ...sections };
     for (const [key, value] of Object.entries(allTokens)) {
@@ -96,7 +96,7 @@ export async function streamHtmlAgent(
       if (text) {
         const cleaned = text.replace(/`{3}html?|`{3}/g, '');
         heroHtml += cleaned;
-        yield cleaned; 
+        yield cleaned;
       }
     }
 

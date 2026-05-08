@@ -9,13 +9,13 @@ import { useStore } from '@/lib/store';
 export default function UploadForm() {
   const router = useRouter();
   const { setFormData, resetCurrent, formData: savedData, modelPrefs, setModelPrefs } = useStore();
-  
+
   const [appName, setAppName] = useState(savedData?.appName || '');
   const [tagline, setTagline] = useState(savedData?.tagline || '');
   const [description, setDescription] = useState(savedData?.description || '');
   const [category, setCategory] = useState(savedData?.category || 'Marketplace');
   const [platform, setPlatform] = useState(savedData?.platform || 'Mobile');
-  
+
   // screenshots can be a mix of Files (new) and base64 strings (restored)
   const [screenshots, setScreenshots] = useState<(File | string)[]>(savedData?.screenshots || []);
 
@@ -37,11 +37,11 @@ export default function UploadForm() {
     e.preventDefault();
     // We don't call resetCurrent here because we want to preserve input if they go back
     // resetCurrent(); 
-    
+
     // Convert files to base64 with compression
     const processImage = (item: File | string): Promise<string> => {
       if (typeof item === 'string') return Promise.resolve(item);
-      
+
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -149,7 +149,7 @@ export default function UploadForm() {
           <Zap size={20} />
           <h3 className="font-semibold text-lg">AI Pipeline Configuration</h3>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-400 flex items-center gap-2">
@@ -201,9 +201,8 @@ export default function UploadForm() {
         <label className="text-sm font-medium text-slate-400">Screenshots (Up to 8)</label>
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-2xl p-12 transition-all cursor-pointer flex flex-col items-center justify-center gap-4 ${
-            isDragActive ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-800 hover:border-slate-700'
-          }`}
+          className={`border-2 border-dashed rounded-2xl p-12 transition-all cursor-pointer flex flex-col items-center justify-center gap-4 ${isDragActive ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-800 hover:border-slate-700'
+            }`}
         >
           <input {...getInputProps()} />
           <div className="p-4 bg-slate-800 rounded-full">

@@ -60,11 +60,11 @@ export const useStore = create<PortfolioStore>()(
       setCopyData: (copyData) => set({ copyData }),
       setHtmlData: (htmlData) => set({ htmlData }),
       setModelPrefs: (modelPrefs) => set({ modelPrefs }),
-      addPortfolio: (portfolio) => set((state) => ({ 
-        portfolios: [portfolio, ...state.portfolios] 
+      addPortfolio: (portfolio) => set((state) => ({
+        portfolios: [portfolio, ...state.portfolios]
       })),
-      deletePortfolio: (id) => set((state) => ({ 
-        portfolios: state.portfolios.filter(p => p.id !== id) 
+      deletePortfolio: (id) => set((state) => ({
+        portfolios: state.portfolios.filter(p => p.id !== id)
       })),
       resetCurrent: () => set({
         formData: null,

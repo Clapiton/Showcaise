@@ -44,11 +44,11 @@ export function buildDesignTokens(design: DesignOutput) {
     const bg2 = isDark
         ? lightenHex(design.bg_color, 8)
         : darkenHex(design.bg_color, 4);
-    
+
     const textMuted = isDark
         ? 'rgba(255,255,255,0.45)'
         : 'rgba(0,0,0,0.45)';
-    
+
     const border = isDark
         ? 'rgba(255,255,255,0.08)'
         : 'rgba(0,0,0,0.08)';
@@ -69,21 +69,21 @@ export function buildDesignTokens(design: DesignOutput) {
 
 // ─── Colour helpers ───────────────────────────────────────────
 function isColorDark(hex: string): boolean {
-  if (!hex || hex[0] !== '#') return false;
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 < 128;
+    if (!hex || hex[0] !== '#') return false;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return (r * 299 + g * 587 + b * 114) / 1000 < 128;
 }
 function lightenHex(hex: string, amount: number): string {
-  if (!hex || hex[0] !== '#') return hex;
-  const r = Math.min(255, Math.max(0, parseInt(hex.slice(1, 3), 16) + amount));
-  const g = Math.min(255, Math.max(0, parseInt(hex.slice(3, 5), 16) + amount));
-  const b = Math.min(255, Math.max(0, parseInt(hex.slice(5, 7), 16) + amount));
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    if (!hex || hex[0] !== '#') return hex;
+    const r = Math.min(255, Math.max(0, parseInt(hex.slice(1, 3), 16) + amount));
+    const g = Math.min(255, Math.max(0, parseInt(hex.slice(3, 5), 16) + amount));
+    const b = Math.min(255, Math.max(0, parseInt(hex.slice(5, 7), 16) + amount));
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 function darkenHex(hex: string, amount: number): string {
-  return lightenHex(hex, -amount);
+    return lightenHex(hex, -amount);
 }
 
 export { THEME_REGISTRY };
